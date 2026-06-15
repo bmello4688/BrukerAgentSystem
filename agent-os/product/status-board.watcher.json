@@ -1,0 +1,7 @@
+﻿{
+    "lastPrintedSha256":  "9a17667fbdac8e8567a82264bb29b054145d7d37bbc9ed2a8255320999a7cceb",
+    "lastPrintedAt":  "2026-06-09T09:48:54.0016133-04:00",
+    "lastSummary":  "- [Main session] - Done: added focused response-mapping and graph snapshot coverage for TripleQuadUI service layers; validation passed for `TripleQuadHardware.Service.IntegrationTests` and `SubstanceAnalyzerCore.Service.IntegrationTests`.",
+    "watcherMode":  "local-file-system-watcher",
+    "watcherPid":  38788
+}

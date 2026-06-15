@@ -1,0 +1,3 @@
+obj\Debug\net9.0/SampleCollectionService.cs \
+obj\Debug\net9.0/SampleCollectionServiceGrpc.cs: C:/Users/brian.mello/.nuget/packages/grpc.tools/2.67.0/build/native/include/google/protobuf/empty.proto\
+ ../../../../../source/TripleQuadUI/CoreLogicLayer/SubstanceAnalyzerCore.Service/Protos/sampleCollectionService.proto

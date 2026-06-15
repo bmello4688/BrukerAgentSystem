@@ -1,0 +1,21 @@
+standards:
+  root:
+    multi-agent-workflow.md: "How Product Owner, Domain Analyst, Coordinator, Feature Engineer, UX, and Reviewer agents collaborate in this workspace."
+    source-control.md: "Rules for working with the TripleQuadUI repository."
+    integration-worktrees.md: "Rules for multi-agent worktrees, branches, ownership claims, integration branches, and parallel story limits."
+    capacity-planning.md: "How Product Owner, Coordinator, Reviewer, UX, Domain Analyst, and Feature Engineers size active agent capacity."
+    testing.md: "Testing expectations for .NET projects, services, simulator/hardware paths, and cross-project changes."
+    story-sizing.md: "AI-aware story point sizing using time, complexity, token/context cost, code surface, testing, integration, safety/security, and uncertainty."
+    status-board.md: "Shared cross-agent status board update rules and notification expectations."
+    definition-of-ready.md: "Readiness gate for user value, dependencies, domain-analysis needs, data, safety/security, tests, and demos."
+    definition-of-done.md: "Minimum completion bar for docs, tests, review, demos, and story handoff."
+    agent-continuity-maintenance.md: "How Reviewer Integration and background maintenance extract sanitized durable context from local agent memory into Agent OS product files."
+  backend:
+    api.md: "Service, API, gRPC/proto, configuration, and data-contract conventions for TripleQuadUI service changes."
+product:
+  mission.md: "Product mission, users, principles, and current workspace scope."
+  tech-stack.md: "Application architecture, repository layout, source control posture, and major project areas."
+  roadmap.md: "Phased agent-system and repository-understanding roadmap."
+  backlog.md: "Clean local backlog for TripleQuadUI discovery, shaping, and feature candidates."
+  decisions.md: "Durable decisions about local agent-system setup and operating rules."
+  agent-continuity.md: "Curated project context and operating memory for future local agents."

@@ -1,0 +1,32 @@
+﻿# TripleQuadUI Shared Agent Status Board
+
+This board is the shared status surface for local TripleQuadUI agents. Keep it outside the Bruker Detection Git repo.
+
+## Board Rules
+
+- Every agent must append or update this file when it starts work, changes state, is blocked, hands off, or finishes.
+- Keep entries concise and operational. Put long evidence in the relevant spec, memory, log file, or review note, then link the path here.
+- Do not include credentials, customer data, private contact details, raw runtime IDs, or sensitive local-only transcript content.
+- If a change affects `source/TripleQuadUI`, include branch/worktree, claimed files, validation, and next action.
+- Prefer updating an existing active item instead of adding duplicate items for the same work.
+
+## State Legend
+
+- Ready: shaped enough for an agent to pick up.
+- Active: an agent is currently working it.
+- Blocked: waiting on human input, hardware/simulator, credentials, unavailable service, or another agent.
+- Review: implementation or analysis is ready for review/integration.
+- Done: completed and no follow-up is required.
+
+## Active Items
+
+No active items yet.
+
+## Recent Updates
+
+- 2026-06-09 09:59 EDT - Main session - Done: added focused response-mapping and graph snapshot coverage for TripleQuadUI service layers; validation passed for `TripleQuadHardware.Service.IntegrationTests` and `SubstanceAnalyzerCore.Service.IntegrationTests`.
+- 2026-06-08 13:45 EDT - Product Owner - Done: reconciled Brian report that BL-006 and BL-007 are complete; remaining backlog is BL-001 through BL-005 ready-to-shape foundation work.
+- 2026-06-08 13:38 EDT - Product Owner - Done: inspected backlog/status-board context for Brian; no active board items, BL-007 is top ready implementation story.
+- 2026-06-08 13:33 EDT - Main session corrected the local watcher Discord target and verified delivery.
+- 2026-06-08 13:31 EDT - Main session replaced the cron poller with a local FileSystemWatcher process for status board notifications.
+- 2026-06-08 12:58 EDT - Main session created the shared status board and watcher plan.

@@ -1,0 +1,4 @@
+obj\Debug\net9.0/InstrumentSimulator.cs \
+obj\Debug\net9.0/InstrumentSimulatorGrpc.cs: C:/Users/brian.mello/.nuget/packages/grpc.tools/2.67.0/build/native/include/google/protobuf/empty.proto\
+ C:/Users/brian.mello/.nuget/packages/grpc.tools/2.67.0/build/native/include/google/protobuf/wrappers.proto\
+ ../../../../../source/TripleQuadUI/HardwareLayer/Msws/Hardware.Instrument.MrmEtd.Communication.Service.Sim/Services/instrumentSimulator.proto

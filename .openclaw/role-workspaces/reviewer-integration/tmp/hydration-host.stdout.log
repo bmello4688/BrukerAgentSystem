@@ -1,0 +1,555 @@
+Using launch settings from MrmEtdMassSpecAnalyzer\MrmEtdMassSpecAnalyzer.MicroServices.Host\Properties\launchSettings.json...
+info: MsWorkstation`1[0]
+      MsWorkstation`1 connection state changed to Connecting
+fail: MsWorkstation`1[0]
+      An error occurred while communicating with the instrument. See inner exception for details.
+      System.ApplicationException: An error occurred while communicating with the instrument. See inner exception for details.
+       ---> Grpc.Core.RpcException: Status(StatusCode="Unavailable", Detail="Error connecting to subchannel.", DebugException="System.Net.Sockets.SocketException: No connection could be made because the target machine actively refused it.")
+       ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at Grpc.Net.Client.Balancer.Internal.SocketConnectivitySubchannelTransport.TryConnectAsync(ConnectContext context, Int32 attempt)
+         --- End of inner exception stack trace ---
+         at Grpc.Net.Client.Balancer.Internal.ConnectionManager.PickAsync(PickContext context, Boolean waitForReady, CancellationToken cancellationToken)
+         at Grpc.Net.Client.Balancer.Internal.BalancerHttpHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+         at Grpc.Net.Client.Internal.GrpcCall`2.RunCall(HttpRequestMessage request, Nullable`1 timeout)
+         at Grpc.Net.Client.Internal.HttpClientCallInvoker.BlockingUnaryCall[TRequest,TResponse](Method`2 method, String host, CallOptions options, TRequest request)
+         at Grpc.Core.Interceptors.InterceptingCallInvoker.<BlockingUnaryCall>b__3_0[TRequest,TResponse](TRequest req, ClientInterceptorContext`2 ctx)
+         at Grpc.Core.ClientBase.ClientBaseConfiguration.ClientBaseConfigurationInterceptor.BlockingUnaryCall[TRequest,TResponse](TRequest request, ClientInterceptorContext`2 context, BlockingUnaryCallContinuation`2 continuation)
+         at Grpc.Core.Interceptors.InterceptingCallInvoker.BlockingUnaryCall[TRequest,TResponse](Method`2 method, String host, CallOptions options, TRequest request)
+         at Hardware.Instrument.MrmEtd.Communication.Service.InstrumentCommunicator.InstrumentCommunicatorClient.Connect(Empty request, CallOptions options) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\obj\Debug\net9.0\InstrumentCommunicatorGrpc.cs:line 614
+         at Hardware.Instrument.MrmEtd.Communication.Service.InstrumentCommunicator.InstrumentCommunicatorClient.Connect(Empty request, Metadata headers, Nullable`1 deadline, CancellationToken cancellationToken) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\obj\Debug\net9.0\InstrumentCommunicatorGrpc.cs:line 603
+         at Hardware.Instrument.MrmEtd.Communication.Client.InstrumentCommunicationClient.<>c__DisplayClass37_0.<Connect>b__0() in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\InstrumentCommunicationClient.cs:line 161
+         at Hardware.Instrument.MrmEtd.Communication.Client.InstrumentCommunicationClient.HandleSocketExceptions(Action action) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\InstrumentCommunicationClient.cs:line 88
+         --- End of inner exception stack trace ---
+         at Hardware.Instrument.MrmEtd.Communication.Client.InstrumentCommunicationClient.HandleException(RpcException ex) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\InstrumentCommunicationClient.cs:line 100
+         at Hardware.Instrument.MrmEtd.Communication.Client.InstrumentCommunicationClient.HandleSocketExceptions(Action action) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\InstrumentCommunicationClient.cs:line 92
+         at Hardware.Instrument.MrmEtd.Communication.Client.InstrumentCommunicationClient.Connect(CancellationToken token) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\InstrumentCommunicationClient.cs:line 159
+         at Hardware.Instrument.MrmEtd.MsWorkstation`1.Connect() in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd\MsWorkstation.cs:line 45
+         at TripleQuadHardwareInstrument.DeviceComponent.CommunicateWithDeviceAsync() in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\TripleQuadHardwareInstrument\DeviceComponent.cs:line 66
+         at TripleQuadHardwareInstrument.DeviceComponent.ChangeConnectionStateOnException(Func`1 funcAsync) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\TripleQuadHardwareInstrument\DeviceComponent.cs:line 159
+info: MsWorkstation`1[0]
+      MsWorkstation`1 connection state changed to Disconnected
+info: MsWorkstation`1[0]
+      MsWorkstation`1 : Clearing components
+info: Desorber[0]
+      Desorber connection state changed to Connecting
+fail: Desorber[0]
+      An error occurred while communicating with the instrument. See inner exception for details.
+      System.ApplicationException: An error occurred while communicating with the instrument. See inner exception for details.
+       ---> Grpc.Core.RpcException: Status(StatusCode="Unavailable", Detail="Error connecting to subchannel.", DebugException="System.Net.Sockets.SocketException: No connection could be made because the target machine actively refused it.")
+       ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at Grpc.Net.Client.Balancer.Internal.SocketConnectivitySubchannelTransport.TryConnectAsync(ConnectContext context, Int32 attempt)
+         --- End of inner exception stack trace ---
+         at Grpc.Net.Client.Balancer.Internal.ConnectionManager.PickAsync(PickContext context, Boolean waitForReady, CancellationToken cancellationToken)
+         at Grpc.Net.Client.Balancer.Internal.BalancerHttpHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+         at Grpc.Net.Client.Internal.GrpcCall`2.RunCall(HttpRequestMessage request, Nullable`1 timeout)
+         at Grpc.Net.Client.Internal.HttpClientCallInvoker.BlockingUnaryCall[TRequest,TResponse](Method`2 method, String host, CallOptions options, TRequest request)
+         at Grpc.Core.Interceptors.InterceptingCallInvoker.<BlockingUnaryCall>b__3_0[TRequest,TResponse](TRequest req, ClientInterceptorContext`2 ctx)
+         at Grpc.Core.ClientBase.ClientBaseConfiguration.ClientBaseConfigurationInterceptor.BlockingUnaryCall[TRequest,TResponse](TRequest request, ClientInterceptorContext`2 context, BlockingUnaryCallContinuation`2 continuation)
+         at Grpc.Core.Interceptors.InterceptingCallInvoker.BlockingUnaryCall[TRequest,TResponse](Method`2 method, String host, CallOptions options, TRequest request)
+         at Hardware.Instrument.MrmEtd.Communication.Service.InstrumentCommunicator.InstrumentCommunicatorClient.IsConnectedToDesorber(Empty request, CallOptions options) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\obj\Debug\net9.0\InstrumentCommunicatorGrpc.cs:line 878
+         at Hardware.Instrument.MrmEtd.Communication.Service.InstrumentCommunicator.InstrumentCommunicatorClient.IsConnectedToDesorber(Empty request, Metadata headers, Nullable`1 deadline, CancellationToken cancellationToken) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\obj\Debug\net9.0\InstrumentCommunicatorGrpc.cs:line 867
+         at Hardware.Instrument.MrmEtd.Communication.Client.InstrumentCommunicationClient.<>c__DisplayClass43_0.<IsConnectedToDesorber>b__0() in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\InstrumentCommunicationClient.cs:line 315
+         at Hardware.Instrument.MrmEtd.Communication.Client.InstrumentCommunicationClient.HandleSocketExceptions(Action action) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\InstrumentCommunicationClient.cs:line 88
+         --- End of inner exception stack trace ---
+         at Hardware.Instrument.MrmEtd.Communication.Client.InstrumentCommunicationClient.HandleException(RpcException ex) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\InstrumentCommunicationClient.cs:line 100
+         at Hardware.Instrument.MrmEtd.Communication.Client.InstrumentCommunicationClient.HandleSocketExceptions(Action action) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\InstrumentCommunicationClient.cs:line 92
+         at Hardware.Instrument.MrmEtd.Communication.Client.InstrumentCommunicationClient.IsConnectedToDesorber(CancellationToken token) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd.Communication.Client\InstrumentCommunicationClient.cs:line 313
+         at Hardware.Instrument.MrmEtd.DesorberClient.Connect() in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd\DesorberClient.cs:line 58
+         at Hardware.Instrument.MrmEtd.Desorber.Connect() in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\Msws\Hardware.Instrument.MrmEtd\Desorber.cs:line 46
+         at TripleQuadHardwareInstrument.DeviceComponent.CommunicateWithDeviceAsync() in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\TripleQuadHardwareInstrument\DeviceComponent.cs:line 66
+         at TripleQuadHardwareInstrument.DeviceComponent.ChangeConnectionStateOnException(Func`1 funcAsync) in C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\HardwareLayer\TripleQuadHardwareInstrument\DeviceComponent.cs:line 159
+info: Desorber[0]
+      Desorber connection state changed to Disconnected
+info: Desorber[0]
+      Desorber : Clearing components
+info: Desorber[0]
+      Desorber connection state changed to Connecting
+info: MsWorkstation`1[0]
+      MsWorkstation`1 connection state changed to Connecting
+info: TripleQuadHardwareInstrument.BaseSubstanceDetector[0]
+      Transition changed from: DisconnectedOrUnknown to Connecting
+info: TripleQuadHardware.Service.Services.TripleQuadHardwareBackgroundService[0]
+      TripleQuadHardwareBackgroundService is running.
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://0.0.0.0:7043
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\MrmEtdMassSpecAnalyzer\MrmEtdMassSpecAnalyzer.MicroServices.Host
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Reloading ApplicationSettings.json.
+info: SubstanceAnalyzerCore.Service.App.SampleDataAnalyzer[0]
+      DataAnalysisSettings.RepositoryType = "FileSystem".
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      1 Settings.ResourcePath = "C:\ProgramData\Bruker\MRM-ETD".
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Loading substance library "SubstanceLibrary.json".
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Substance library loaded from "C:\ProgramData\Bruker\MRM-ETD\SubstanceLibrary.json".
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Loading classifier "Classifier.json".
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Classifier loaded from "C:\ProgramData\Bruker\MRM-ETD\Classifier.json".
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Reloading substance library.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Reloading classifier.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      61 substances found in classifier.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Copied 61 substances in classifier to 61 in substance library memory object.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Validating substance library.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Reloading substance library.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Reloading classifier.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      61 substances found in classifier.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Copied 61 substances in classifier to 61 in substance library memory object.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Validating substance library.
+info: SubstanceAnalyzerCore.Service.App.SampleManager[0]
+      DataAnalysisSettings.RepositoryType = "FileSystem".
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Next sample number = 1017097.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      SetFaultMode(ComputerDisconnected) called. NeedToCalibrate=False, ReadyToVerifyCalibration=False, CollectorState=LookingForInstrument.
+info: SubstanceAnalyzerCore.Services.SampleCollectionBackgroundService[0]
+      SampleCollectionBackgroundService is running.
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://0.0.0.0:7042
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\MrmEtdMassSpecAnalyzer\MrmEtdMassSpecAnalyzer.MicroServices.Host
+Enabled Serilog internal logging for Hardware.Instrument.MrmEtd.Communication.Service.Sim to "C:\Users\brian.mello\AppData\Local\Temp\serilog_internal_Hardware.Instrument.MrmEtd.Communication.Service.Sim.log".
+Configuring Serilog for Hardware.Instrument.MrmEtd.Communication.Service.Sim from "C:\Git\Commercial\MrmETDSpec\source\TripleQuadUI\MrmEtdMassSpecAnalyzer\MrmEtdMassSpecAnalyzer.MicroServices.Host\bin\Debug\net9.0\Hardware.Instrument.MrmEtd.Communication.Service.Sim.appsettings.json".
+Serilog file opened: "C:\ProgramData\Bruker\MRM-ETD\Simulator\Logs\20260605_006.log".
+Started Hardware.Instrument.MrmEtd.Communication.Service.Sim logging to "C:\ProgramData\Bruker\MRM-ETD\Simulator\Logs\20260605_006.log".
+MSWorkstation..ctor() entry.
+Desorber..ctor() entry.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      DetermineState(): Changing CollectorState.State from LookingForInstrument to FoundInstrument.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      SetFaultMode(CannotFindInstrument) called. NeedToCalibrate=True, ReadyToVerifyCalibration=False, CollectorState=WaitingOnCompoundDetectorToBeReady.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      SetFaultMode(ComputerDisconnected) called. NeedToCalibrate=True, ReadyToVerifyCalibration=False, CollectorState=WaitingOnCompoundDetectorToBeReady.
+info: Desorber[0]
+      Desorber connection state changed to Connected
+info: MsWorkstation`1[0]
+      MsWorkstation`1 connection state changed to Connected
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      CannotFindInstrument fault removed.
+info: Desorber[0]
+      Desorber : Initializing components
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Suppressed 7 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollectionManager: SetFaultMode(ComputerDisconnected) called. NeedToCalibrate=True, ReadyToVerifyCalibration=False, CollectorState=WaitingOnCompoundDetectorToBeReady.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      SetFaultMode(ComputerDisconnected) called. NeedToCalibrate=True, ReadyToVerifyCalibration=False, CollectorState=WaitingOnCompoundDetectorToBeReady.
+info: MsWorkstation`1[0]
+      MsWorkstation`1 : Initializing components
+info: TripleQuadHardwareInstrument.BaseSubstanceDetector[0]
+      Transition changed from: Connecting to ShutDown
+info: TripleQuadHardwareInstrument.BaseSubstanceDetector[0]
+      Transition changed from: ShutDown to StartingUp
+info: TripleQuadHardwareInstrument.BaseSubstanceDetector[0]
+      Transition changed from: StartingUp to WaitingOnStartup
+info: TripleQuadHardwareInstrument.BaseSubstanceDetector[0]
+      Transition changed from: WaitingOnStartup to Sleeping
+Logging to "C:\ProgramData\Bruker\Common.DataService\DataService.Service\Logs\".
+Enabled Serilog internal logging to "C:\Users\brian.mello\AppData\Local\Temp\serilog_internal_DataService.Service.log".
+info: TripleQuadHardwareInstrument.BaseDeviceManager[0]
+      Wakeup instrument
+info: TripleQuadHardwareInstrument.BaseSubstanceDetector[0]
+      Detector Can Analyze False
+info: TripleQuadHardwareInstrument.BaseSubstanceDetector[0]
+      Are Sensors In Range True
+info: TripleQuadHardwareInstrument.BaseSubstanceDetector[0]
+      Out of range sensors:
+	 
+info: TripleQuadHardwareInstrument.BaseSubstanceDetector[0]
+      Transition changed from: Sleeping to WaitingOnDevices
+info: TripleQuadHardwareInstrument.BaseSubstanceDetector[0]
+      Start sampling
+info: TripleQuadHardwareInstrument.BaseSubstanceDetector[0]
+      Transition changed from: WaitingOnDevices to Ready
+info: TripleQuadHardwareInstrument.BaseSubstanceDetector[0]
+      Transition changed from: Ready to Calibrating
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Waiting for Sample Collector to be ready
+info: TripleQuadHardwareInstrument.BaseSubstanceDetector[0]
+      Transition changed from: Calibrating to Ready
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector ready but waiting for swab insertion. ClampState=OpenAndEmpty, ReadyToCollectSample=True, ObservedOpenClamp=True.
+info: TripleQuadHardwareInstrument.BaseDeviceManager[0]
+      Swab clamp closed. Swab was inserted
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      SampleCollectionService observed swab clamp change. SwabClampState=ClosedWithSwab, CollectionState=VerifyCalibration, CollectorState=CollectingBaseline, ReadyToCollectSample=True, IsRunningConfidenceCheck=True.
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      Swab clamp changed to ClosedWithSwab. Clearing active alarm before continuing collection flow.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector.OnSwabClampChanged received clamp event. ClampState=ClosedWithSwab, CollectorState=CollectingBaseline, ReadyToCollectSample=True, BaselineScans=10, AnalysisScans=0, StartAnalysis=False, StopAnalysis=False, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Suppressed 1 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollector: SampleCollector ready but waiting for swab insertion. ClampState=OpenAndEmpty, ReadyToCollectSample=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector firing BeginCollecting from swab clamp event. ClampState=ClosedWithSwab, ReadyToCollectSample=True, StartAnalysis=False.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Start new scan series
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Incremented next sample number to 1017098 and saving it to C:\ProgramData\Bruker\MRM-ETD\AutoUpdated.json.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Reached Max Analyzing Scans
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector firing FinishedCollectingSample. ClampState=ClosedWithSwab, AnalysisScans=23, HasAnalysisLimit=True, StopAnalysis=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Took 2.202s to acquire scans for this sample.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector waiting for swab removal. ClampState=ClosedWithSwab, AnalysisScans=23.
+info: TripleQuadHardwareInstrument.BaseDeviceManager[0]
+      Swab clamp opened
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      SampleCollectionService observed swab clamp change. SwabClampState=SwabNeedsToBeRemoved, CollectionState=VerifyCalibration, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, IsRunningConfidenceCheck=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector.OnSwabClampChanged received clamp event. ClampState=SwabNeedsToBeRemoved, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, BaselineScans=7, AnalysisScans=23, StartAnalysis=True, StopAnalysis=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Suppressed 11 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollector: SampleCollector waiting for swab removal. ClampState=ClosedWithSwab, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector waiting for swab removal. ClampState=SwabNeedsToBeRemoved, AnalysisScans=23.
+info: TripleQuadHardwareInstrument.BaseDeviceManager[0]
+      Swab removed
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      SampleCollectionService observed swab clamp change. SwabClampState=OpenAndEmpty, CollectionState=VerifyCalibration, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, IsRunningConfidenceCheck=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector.OnSwabClampChanged received clamp event. ClampState=OpenAndEmpty, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, BaselineScans=7, AnalysisScans=23, StartAnalysis=True, StopAnalysis=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Suppressed 5 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollector: SampleCollector waiting for swab removal. ClampState=SwabNeedsToBeRemoved, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector firing SwabRemoved from WaitingForSwabRemoval. ClampState=OpenAndEmpty, AnalysisScans=23, BaselineScans=7.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Exiting cleardown. HasScanSeries=True, AnalysisScans=23, CleardownScans=1, Subscribers=1.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Preparing scan series #1017097 for save. BaselineScans=7, AnalysisScans=23, CleardownScans=1, Subscribers=1.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Raising SampleCollected for scan series #1017097.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      OnSampleCollected entered for sample #1017097. State=VerifyCalibration, ConfidenceCheck=True, BaselineScans=7, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Suppressed 4 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollectionManager: SetFaultMode(ComputerDisconnected) called. NeedToCalibrate=True, ReadyToVerifyCalibration=False, CollectorState=WaitingOnCompoundDetectorToBeReady.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Collected sample #1017097. State=VerifyCalibration, ConfidenceCheck=True, BaselineScans=7, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Classifying sample #1017097.
+info: SubstanceAnalyzerCore.Service.App.SampleDataAnalyzer[0]
+      Classify scan series
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Reloading substance library.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Reloading classifier.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      61 substances found in classifier.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Copied 61 substances in classifier to 61 in substance library memory object.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Validating substance library.
+info: SubstanceAnalyzerCore.Service.App.SampleDataAnalyzer[0]
+      Classify finished
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Classified sample #1017097.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Saving sample #1017097. IsConfidenceCheck=True, DidConfidenceCheckPass=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollected raised for scan series #1017097.
+fail: SubstanceAnalyzerCore.Service.App.SampleManager[0]
+      ID property not set.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector ready but waiting for swab insertion. ClampState=OpenAndEmpty, ReadyToCollectSample=True, ObservedOpenClamp=True.
+warn: SubstanceAnalyzerCore.Service.App.SampleDataAnalyzer[0]
+      Took longer than 1 sec to save scan series.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Saved sample #1017097.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Raising manager SampleCollected for sample #1017097. Subscribers=1.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Manager SampleCollected raised for sample #1017097.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Waiting to leave VerifyCalibration until hardware clears verification. NeedToCalibrate=True, ReadyToVerifyCalibration=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector firing BeginCollecting during DetermineState. ClampState=OpenAndEmpty, ReadyToCollectSample=True, StartAnalysis=True, ObservedOpenClamp=True, ObservedInsertedSwab=False.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Suppressed 16 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollector: SampleCollector ready but waiting for swab insertion. ClampState=OpenAndEmpty, ReadyToCollectSample=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Start new scan series
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Incremented next sample number to 1017099 and saving it to C:\ProgramData\Bruker\MRM-ETD\AutoUpdated.json.
+info: TripleQuadHardwareInstrument.BaseDeviceManager[0]
+      Swab clamp closed. Swab was inserted
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Clearing alarm.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Suppressed 1 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollectionManager: Waiting to leave VerifyCalibration until hardware clears verification. NeedToCalibrate=True, ReadyToVerifyCalibration=True.
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      SampleCollectionService observed swab clamp change. SwabClampState=ClosedWithSwab, CollectionState=SampleCollecting, CollectorState=CollectingSample, ReadyToCollectSample=True, IsRunningConfidenceCheck=False.
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      Swab clamp changed to ClosedWithSwab. Clearing active alarm before continuing collection flow.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector.OnSwabClampChanged received clamp event. ClampState=ClosedWithSwab, CollectorState=CollectingSample, ReadyToCollectSample=True, BaselineScans=7, AnalysisScans=3, StartAnalysis=False, StopAnalysis=False, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Reached Max Analyzing Scans
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector firing FinishedCollectingSample. ClampState=ClosedWithSwab, AnalysisScans=23, HasAnalysisLimit=True, StopAnalysis=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Took 2.177s to acquire scans for this sample.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector waiting for swab removal. ClampState=ClosedWithSwab, AnalysisScans=23.
+info: TripleQuadHardwareInstrument.BaseDeviceManager[0]
+      Swab clamp opened
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      SampleCollectionService observed swab clamp change. SwabClampState=SwabNeedsToBeRemoved, CollectionState=SampleCollecting, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, IsRunningConfidenceCheck=False.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector.OnSwabClampChanged received clamp event. ClampState=SwabNeedsToBeRemoved, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, BaselineScans=7, AnalysisScans=23, StartAnalysis=False, StopAnalysis=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Suppressed 5 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollector: SampleCollector waiting for swab removal. ClampState=ClosedWithSwab, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector waiting for swab removal. ClampState=SwabNeedsToBeRemoved, AnalysisScans=23.
+info: TripleQuadHardwareInstrument.BaseDeviceManager[0]
+      Swab removed
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      SampleCollectionService observed swab clamp change. SwabClampState=OpenAndEmpty, CollectionState=SampleCollecting, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, IsRunningConfidenceCheck=False.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector.OnSwabClampChanged received clamp event. ClampState=OpenAndEmpty, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, BaselineScans=7, AnalysisScans=23, StartAnalysis=False, StopAnalysis=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Suppressed 3 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollector: SampleCollector waiting for swab removal. ClampState=SwabNeedsToBeRemoved, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector firing SwabRemoved from WaitingForSwabRemoval. ClampState=OpenAndEmpty, AnalysisScans=23, BaselineScans=7.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Exiting cleardown. HasScanSeries=True, AnalysisScans=23, CleardownScans=1, Subscribers=1.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Preparing scan series #1017098 for save. BaselineScans=7, AnalysisScans=23, CleardownScans=1, Subscribers=1.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Raising SampleCollected for scan series #1017098.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      OnSampleCollected entered for sample #1017098. State=SampleCollecting, ConfidenceCheck=False, BaselineScans=7, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Collected sample #1017098. State=SampleCollecting, ConfidenceCheck=False, BaselineScans=7, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Classifying sample #1017098.
+info: SubstanceAnalyzerCore.Service.App.SampleDataAnalyzer[0]
+      Classify scan series
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Reloading substance library.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Reloading classifier.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      61 substances found in classifier.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Copied 61 substances in classifier to 61 in substance library memory object.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Validating substance library.
+info: SubstanceAnalyzerCore.Service.App.SampleDataAnalyzer[0]
+      Classify finished
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Classified sample #1017098.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Saving sample #1017098. IsConfidenceCheck=False, DidConfidenceCheckPass=False.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollected raised for scan series #1017098.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Saved sample #1017098.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Raising manager SampleCollected for sample #1017098. Subscribers=1.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Manager SampleCollected raised for sample #1017098.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector ready but waiting for swab insertion. ClampState=OpenAndEmpty, ReadyToCollectSample=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector ready but waiting for swab insertion. ClampState=OpenAndEmpty, ReadyToCollectSample=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Suppressed 177 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollector: SampleCollector ready but waiting for swab insertion. ClampState=OpenAndEmpty, ReadyToCollectSample=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector firing BeginCollecting during DetermineState. ClampState=OpenAndEmpty, ReadyToCollectSample=True, StartAnalysis=True, ObservedOpenClamp=True, ObservedInsertedSwab=False.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Suppressed 102 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollector: SampleCollector ready but waiting for swab insertion. ClampState=OpenAndEmpty, ReadyToCollectSample=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Start new scan series
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Incremented next sample number to 1017100 and saving it to C:\ProgramData\Bruker\MRM-ETD\AutoUpdated.json.
+info: TripleQuadHardwareInstrument.BaseDeviceManager[0]
+      Swab clamp closed. Swab was inserted
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Clearing alarm.
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      SampleCollectionService observed swab clamp change. SwabClampState=ClosedWithSwab, CollectionState=SampleCollecting, CollectorState=CollectingSample, ReadyToCollectSample=True, IsRunningConfidenceCheck=False.
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      Swab clamp changed to ClosedWithSwab. Clearing active alarm before continuing collection flow.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector.OnSwabClampChanged received clamp event. ClampState=ClosedWithSwab, CollectorState=CollectingSample, ReadyToCollectSample=True, BaselineScans=7, AnalysisScans=3, StartAnalysis=False, StopAnalysis=False, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Reached Max Analyzing Scans
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector firing FinishedCollectingSample. ClampState=ClosedWithSwab, AnalysisScans=23, HasAnalysisLimit=True, StopAnalysis=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Took 4.286s to acquire scans for this sample.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector waiting for swab removal. ClampState=ClosedWithSwab, AnalysisScans=23.
+info: TripleQuadHardwareInstrument.BaseDeviceManager[0]
+      Swab clamp opened
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      SampleCollectionService observed swab clamp change. SwabClampState=SwabNeedsToBeRemoved, CollectionState=SampleCollecting, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, IsRunningConfidenceCheck=False.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector.OnSwabClampChanged received clamp event. ClampState=SwabNeedsToBeRemoved, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, BaselineScans=7, AnalysisScans=23, StartAnalysis=False, StopAnalysis=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector waiting for swab removal. ClampState=SwabNeedsToBeRemoved, AnalysisScans=23.
+info: TripleQuadHardwareInstrument.BaseDeviceManager[0]
+      Swab removed
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector.OnSwabClampChanged received clamp event. ClampState=OpenAndEmpty, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, BaselineScans=7, AnalysisScans=23, StartAnalysis=False, StopAnalysis=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Suppressed 2 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollector: SampleCollector waiting for swab removal. ClampState=SwabNeedsToBeRemoved, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      SampleCollectionService observed swab clamp change. SwabClampState=OpenAndEmpty, CollectionState=SampleCollecting, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, IsRunningConfidenceCheck=False.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector firing SwabRemoved from WaitingForSwabRemoval. ClampState=OpenAndEmpty, AnalysisScans=23, BaselineScans=7.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Exiting cleardown. HasScanSeries=True, AnalysisScans=23, CleardownScans=1, Subscribers=1.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Preparing scan series #1017099 for save. BaselineScans=7, AnalysisScans=23, CleardownScans=1, Subscribers=1.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Raising SampleCollected for scan series #1017099.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      OnSampleCollected entered for sample #1017099. State=SampleCollecting, ConfidenceCheck=False, BaselineScans=7, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Collected sample #1017099. State=SampleCollecting, ConfidenceCheck=False, BaselineScans=7, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Classifying sample #1017099.
+info: SubstanceAnalyzerCore.Service.App.SampleDataAnalyzer[0]
+      Classify scan series
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Reloading substance library.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Reloading classifier.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      61 substances found in classifier.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Copied 61 substances in classifier to 61 in substance library memory object.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Validating substance library.
+info: SubstanceAnalyzerCore.Service.App.SampleDataAnalyzer[0]
+      Classify finished
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Classified sample #1017099.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Saving sample #1017099. IsConfidenceCheck=False, DidConfidenceCheckPass=False.
+fail: SubstanceAnalyzerCore.Service.App.SampleManager[0]
+      ID property not set.
+fail: SubstanceAnalyzerCore.Service.App.SampleManager[0]
+      Suppressed 1 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleManager: ID property not set.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollected raised for scan series #1017099.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Saved sample #1017099.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Raising manager SampleCollected for sample #1017099. Subscribers=1.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Manager SampleCollected raised for sample #1017099.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector ready but waiting for swab insertion. ClampState=OpenAndEmpty, ReadyToCollectSample=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Clearing alarm.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector firing BeginCollecting during DetermineState. ClampState=OpenAndEmpty, ReadyToCollectSample=True, StartAnalysis=True, ObservedOpenClamp=True, ObservedInsertedSwab=False.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Suppressed 132 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollector: SampleCollector ready but waiting for swab insertion. ClampState=OpenAndEmpty, ReadyToCollectSample=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Start new scan series
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Incremented next sample number to 1017101 and saving it to C:\ProgramData\Bruker\MRM-ETD\AutoUpdated.json.
+info: TripleQuadHardwareInstrument.BaseDeviceManager[0]
+      Swab clamp closed. Swab was inserted
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      SampleCollectionService observed swab clamp change. SwabClampState=ClosedWithSwab, CollectionState=SampleCollecting, CollectorState=CollectingSample, ReadyToCollectSample=True, IsRunningConfidenceCheck=False.
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      Swab clamp changed to ClosedWithSwab. Clearing active alarm before continuing collection flow.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector.OnSwabClampChanged received clamp event. ClampState=ClosedWithSwab, CollectorState=CollectingSample, ReadyToCollectSample=True, BaselineScans=7, AnalysisScans=4, StartAnalysis=False, StopAnalysis=False, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Reached Max Analyzing Scans
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector firing FinishedCollectingSample. ClampState=ClosedWithSwab, AnalysisScans=23, HasAnalysisLimit=True, StopAnalysis=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Took 4.139s to acquire scans for this sample.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector waiting for swab removal. ClampState=ClosedWithSwab, AnalysisScans=23.
+info: TripleQuadHardwareInstrument.BaseDeviceManager[0]
+      Swab clamp opened
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      SampleCollectionService observed swab clamp change. SwabClampState=SwabNeedsToBeRemoved, CollectionState=SampleCollecting, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, IsRunningConfidenceCheck=False.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector.OnSwabClampChanged received clamp event. ClampState=SwabNeedsToBeRemoved, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, BaselineScans=7, AnalysisScans=23, StartAnalysis=False, StopAnalysis=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Suppressed 1 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollector: SampleCollector waiting for swab removal. ClampState=ClosedWithSwab, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector waiting for swab removal. ClampState=SwabNeedsToBeRemoved, AnalysisScans=23.
+info: TripleQuadHardwareInstrument.BaseDeviceManager[0]
+      Swab removed
+info: SubstanceAnalyzerCore.Services.SampleCollectionService[0]
+      SampleCollectionService observed swab clamp change. SwabClampState=OpenAndEmpty, CollectionState=SampleCollecting, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, IsRunningConfidenceCheck=False.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector.OnSwabClampChanged received clamp event. ClampState=OpenAndEmpty, CollectorState=WaitingForSwabRemoval, ReadyToCollectSample=True, BaselineScans=7, AnalysisScans=23, StartAnalysis=False, StopAnalysis=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Suppressed 1 repeated log messages from SubstanceAnalyzerCore.Service.App.SampleCollector: SampleCollector waiting for swab removal. ClampState=SwabNeedsToBeRemoved, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector firing SwabRemoved from WaitingForSwabRemoval. ClampState=OpenAndEmpty, AnalysisScans=23, BaselineScans=7.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Exiting cleardown. HasScanSeries=True, AnalysisScans=23, CleardownScans=1, Subscribers=1.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Preparing scan series #1017100 for save. BaselineScans=7, AnalysisScans=23, CleardownScans=1, Subscribers=1.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      Raising SampleCollected for scan series #1017100.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      OnSampleCollected entered for sample #1017100. State=SampleCollecting, ConfidenceCheck=False, BaselineScans=7, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Collected sample #1017100. State=SampleCollecting, ConfidenceCheck=False, BaselineScans=7, AnalysisScans=23.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Classifying sample #1017100.
+info: SubstanceAnalyzerCore.Service.App.SampleDataAnalyzer[0]
+      Classify scan series
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Reloading substance library.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Reloading classifier.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      61 substances found in classifier.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Copied 61 substances in classifier to 61 in substance library memory object.
+info: Bruker.Algorithms.Preprocessing.AlgorithmSettingsService[0]
+      Validating substance library.
+info: SubstanceAnalyzerCore.Service.App.SampleDataAnalyzer[0]
+      Classify finished
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Classified sample #1017100.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Saving sample #1017100. IsConfidenceCheck=False, DidConfidenceCheckPass=False.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollected raised for scan series #1017100.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Saved sample #1017100.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Raising manager SampleCollected for sample #1017100. Subscribers=1.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Manager SampleCollected raised for sample #1017100.
+info: SubstanceAnalyzerCore.Service.App.SampleCollector[0]
+      SampleCollector ready but waiting for swab insertion. ClampState=OpenAndEmpty, ReadyToCollectSample=True, ObservedOpenClamp=True.
+info: SubstanceAnalyzerCore.Service.App.SampleCollectionManager[0]
+      Clearing alarm.

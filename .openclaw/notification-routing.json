@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "project": "TripleQuadUI",
+  "defaultNotificationTarget": {
+    "channel": "discord",
+    "guildId": "930288076977233970",
+    "channelId": "1511474561932071072",
+    "channelLabel": "#brukerdev",
+    "note": "Notify the active Discord channel for project-owner review and merge decisions."
+  },
+  "notifyWhen": [
+    "human_blocked",
+    "needs_user_action",
+    "needs_code_review",
+    "feature_branch_ready_for_review",
+    "ready_for_manual_merge_to_master",
+    "review_rejected_requires_fix",
+    "needs_code_viewer_attention",
+    "story_ready_to_demo",
+    "story_completed"
+  ],
+  "notes": [
+    "Project-level notification routing for local agents working on TripleQuadUI.",
+    "Notify in Discord when a feature is ready for project-owner code review and manual merge to master.",
+    "If review is rejected, the feature branch must be fixed and re-reviewed before merge.",
+    "Do not hard-code phone numbers or emails in agent prompts."
+  ]
+}

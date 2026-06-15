@@ -1,0 +1,6 @@
+obj\Debug\net9.0/TripleQuadHardware.cs \
+obj\Debug\net9.0/TripleQuadHardwareGrpc.cs: C:/Users/brian.mello/.nuget/packages/grpc.tools/2.67.0/build/native/include/google/protobuf/empty.proto\
+ C:/Users/brian.mello/.nuget/packages/grpc.tools/2.67.0/build/native/include/google/protobuf/wrappers.proto\
+ ../../../../../source/TripleQuadUI/HardwareLayer/TripleQuadHardwareInstrument/Protos/instrumentCommon.proto\
+ ../../../../../source/TripleQuadUI/HardwareLayer/TripleQuadHardwareInstrument/Protos/instrumentHardware.proto\
+ ../../../../../source/TripleQuadUI/HardwareLayer/TripleQuadHardware.Service/Protos/tripleQuadHardware.proto
