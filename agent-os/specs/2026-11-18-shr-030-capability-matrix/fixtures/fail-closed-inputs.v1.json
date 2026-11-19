@@ -1,0 +1,148 @@
+{
+    "schemaVersion":  1,
+    "fallback":  {
+                     "effectiveDecision":  "denied",
+                     "guidanceCategory":  "unknown-code",
+                     "retryDisposition":  "do-not-retry",
+                     "presentationProjection":  "visible-disabled",
+                     "protectedContentDisposition":  "remove",
+                     "focusDisposition":  "restore-stable-target",
+                     "statusAnnouncement":  "announce-neutral-unknown-code"
+                 },
+    "cases":  [
+                  {
+                      "id":  "missing-base-role",
+                      "baseRoles":  [
+
+                                    ],
+                      "bundles":  [
+
+                                  ],
+                      "input":  "",
+                      "expected":  "deny"
+                  },
+                  {
+                      "id":  "lab-qa-bundle-only",
+                      "baseRoles":  [
+
+                                    ],
+                      "bundles":  [
+                                      "lab-qa"
+                                  ],
+                      "input":  "lab-qa",
+                      "expected":  "deny"
+                  },
+                  {
+                      "id":  "service-bundle-only",
+                      "baseRoles":  [
+
+                                    ],
+                      "bundles":  [
+                                      "service-maintenance"
+                                  ],
+                      "input":  "service-maintenance",
+                      "expected":  "deny"
+                  },
+                  {
+                      "id":  "conflicting-operator-supervisor",
+                      "baseRoles":  [
+                                        "operator",
+                                        "supervisor"
+                                    ],
+                      "bundles":  [
+
+                                  ],
+                      "input":  "operator+supervisor",
+                      "expected":  "deny"
+                  },
+                  {
+                      "id":  "conflicting-supervisor-administrator",
+                      "baseRoles":  [
+                                        "supervisor",
+                                        "administrator"
+                                    ],
+                      "bundles":  [
+
+                                  ],
+                      "input":  "supervisor+administrator",
+                      "expected":  "deny"
+                  },
+                  {
+                      "id":  "unknown-role",
+                      "baseRoles":  [
+                                        "future-role"
+                                    ],
+                      "bundles":  [
+
+                                  ],
+                      "input":  "future-role",
+                      "expected":  "deny"
+                  },
+                  {
+                      "id":  "unknown-bit-33",
+                      "baseRoles":  [
+                                        "administrator"
+                                    ],
+                      "bundles":  [
+
+                                  ],
+                      "input":  "0x0000000200000000",
+                      "expected":  "deny"
+                  },
+                  {
+                      "id":  "unknown-bit-63",
+                      "baseRoles":  [
+                                        "administrator"
+                                    ],
+                      "bundles":  [
+
+                                  ],
+                      "input":  "0x8000000000000000",
+                      "expected":  "deny"
+                  },
+                  {
+                      "id":  "unsupported-schema-version",
+                      "baseRoles":  [
+                                        "administrator"
+                                    ],
+                      "bundles":  [
+
+                                  ],
+                      "input":  "schemaVersion=2",
+                      "expected":  "deny"
+                  },
+                  {
+                      "id":  "unknown-operation-code",
+                      "baseRoles":  [
+                                        "administrator"
+                                    ],
+                      "bundles":  [
+
+                                  ],
+                      "input":  "future-operation",
+                      "expected":  "deny"
+                  },
+                  {
+                      "id":  "unknown-policy-state",
+                      "baseRoles":  [
+                                        "administrator"
+                                    ],
+                      "bundles":  [
+
+                                  ],
+                      "input":  "future-policy-state",
+                      "expected":  "deny"
+                  },
+                  {
+                      "id":  "unknown-guidance-code",
+                      "baseRoles":  [
+                                        "administrator"
+                                    ],
+                      "bundles":  [
+
+                                  ],
+                      "input":  "future-guidance",
+                      "expected":  "deny"
+                  }
+              ]
+}

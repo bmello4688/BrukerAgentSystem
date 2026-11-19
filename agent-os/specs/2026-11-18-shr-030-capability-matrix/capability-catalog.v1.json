@@ -1,0 +1,951 @@
+{
+    "schemaVersion":  1,
+    "policyId":  "bruker.user-management.capability-matrix.v1",
+    "effectiveDate":  "2026-11-18",
+    "authority":  [
+                      "FRD-133-APPENDIX-C",
+                      "OWNER-ATTESTATION-2026-11-18"
+                  ],
+    "capabilities":  [
+                         {
+                             "id":  "CanShutdownReboot",
+                             "bit":  0,
+                             "maskHex":  "0x0000000000000001",
+                             "status":  "published",
+                             "protoField":  "can_shutdown_reboot:1",
+                             "description":  "Shut down or reboot the instrument."
+                         },
+                         {
+                             "id":  "CanLogonLogoff",
+                             "bit":  1,
+                             "maskHex":  "0x0000000000000002",
+                             "status":  "published",
+                             "protoField":  "can_logon_logoff:2",
+                             "description":  "Start or end an authenticated session."
+                         },
+                         {
+                             "id":  "CanAnalyzeSamples",
+                             "bit":  2,
+                             "maskHex":  "0x0000000000000004",
+                             "status":  "published",
+                             "protoField":  "can_analyze_samples:3",
+                             "description":  "Analyze samples."
+                         },
+                         {
+                             "id":  "CanAccessAlarms",
+                             "bit":  3,
+                             "maskHex":  "0x0000000000000008",
+                             "status":  "published",
+                             "protoField":  "can_access_alarms:4",
+                             "description":  "Access alarm information."
+                         },
+                         {
+                             "id":  "CanEditAudibleAlarms",
+                             "bit":  4,
+                             "maskHex":  "0x0000000000000010",
+                             "status":  "published",
+                             "protoField":  "can_edit_audible_alarms:5",
+                             "description":  "Change audible-alarm settings."
+                         },
+                         {
+                             "id":  "CanViewSubstanceLibrary",
+                             "bit":  5,
+                             "maskHex":  "0x0000000000000020",
+                             "status":  "published",
+                             "protoField":  "can_view_substance_library:6",
+                             "description":  "View the substance library."
+                         },
+                         {
+                             "id":  "CanEditSubstanceLibrary",
+                             "bit":  6,
+                             "maskHex":  "0x0000000000000040",
+                             "status":  "published",
+                             "protoField":  "can_edit_substance_library:7",
+                             "description":  "Edit the substance library."
+                         },
+                         {
+                             "id":  "CanSelectDetectionAlgorithm",
+                             "bit":  7,
+                             "maskHex":  "0x0000000000000080",
+                             "status":  "published",
+                             "protoField":  "can_select_detection_algorithm:8",
+                             "description":  "Select a detection algorithm."
+                         },
+                         {
+                             "id":  "CanDoSubstanceTraining",
+                             "bit":  8,
+                             "maskHex":  "0x0000000000000100",
+                             "status":  "published",
+                             "protoField":  "can_do_substance_training:9",
+                             "description":  "Train substances."
+                         },
+                         {
+                             "id":  "CanEnableDisablePrinting",
+                             "bit":  9,
+                             "maskHex":  "0x0000000000000200",
+                             "status":  "published",
+                             "protoField":  "can_EnableDisablePrinting:10",
+                             "description":  "Manage printing and auto-print settings."
+                         },
+                         {
+                             "id":  "CanAccessInstrumentConfiguration",
+                             "bit":  10,
+                             "maskHex":  "0x0000000000000400",
+                             "status":  "published",
+                             "protoField":  "can_AccessInstrumentConfiguration:11",
+                             "description":  "Change instrument configuration."
+                         },
+                         {
+                             "id":  "CanAccessSamplingDataSystemStatus",
+                             "bit":  11,
+                             "maskHex":  "0x0000000000000800",
+                             "status":  "published",
+                             "protoField":  "can_AccessSamplingDataSystemStatus:12",
+                             "description":  "View sampling-data system status."
+                         },
+                         {
+                             "id":  "CanAccessReports",
+                             "bit":  12,
+                             "maskHex":  "0x0000000000001000",
+                             "status":  "published-disabled",
+                             "protoField":  "can_AccessReports:13",
+                             "description":  "Enter, generate, and view reports."
+                         },
+                         {
+                             "id":  "CanEditSecurityFooter",
+                             "bit":  13,
+                             "maskHex":  "0x0000000000002000",
+                             "status":  "published",
+                             "protoField":  "can_EditSecurityFooter:14",
+                             "description":  "Edit the controlled SSI statement."
+                         },
+                         {
+                             "id":  "CanDoMaintenance",
+                             "bit":  14,
+                             "maskHex":  "0x0000000000004000",
+                             "status":  "published",
+                             "protoField":  "can_do_maintenance:15",
+                             "description":  "Execute maintenance."
+                         },
+                         {
+                             "id":  "CanCleanSystem",
+                             "bit":  15,
+                             "maskHex":  "0x0000000000008000",
+                             "status":  "published",
+                             "protoField":  "can_clean_system:16",
+                             "description":  "Clean the system."
+                         },
+                         {
+                             "id":  "CanAutoCalibrate",
+                             "bit":  16,
+                             "maskHex":  "0x0000000000010000",
+                             "status":  "published",
+                             "protoField":  "can_auto_calibrate:17",
+                             "description":  "Run automatic calibration."
+                         },
+                         {
+                             "id":  "CanManuallyCalibrate",
+                             "bit":  17,
+                             "maskHex":  "0x0000000000020000",
+                             "status":  "published",
+                             "protoField":  "can_manually_calibrate:18",
+                             "description":  "Run manual calibration."
+                         },
+                         {
+                             "id":  "CanManageData",
+                             "bit":  18,
+                             "maskHex":  "0x0000000000040000",
+                             "status":  "published",
+                             "protoField":  "can_manage_data:19",
+                             "description":  "Manage retained data."
+                         },
+                         {
+                             "id":  "CanCopyDataToUsb",
+                             "bit":  19,
+                             "maskHex":  "0x0000000000080000",
+                             "status":  "published",
+                             "protoField":  "can_copy_data_to_usb:20",
+                             "description":  "Copy sampling data to attached storage."
+                         },
+                         {
+                             "id":  "CanExportSamplingData",
+                             "bit":  20,
+                             "maskHex":  "0x0000000000100000",
+                             "status":  "published",
+                             "protoField":  "can_export_sampling_data:21",
+                             "description":  "Export sampling data."
+                         },
+                         {
+                             "id":  "CanUpgradeSoftware",
+                             "bit":  21,
+                             "maskHex":  "0x0000000000200000",
+                             "status":  "published",
+                             "protoField":  "can_upgrade_software:22",
+                             "description":  "Upgrade software."
+                         },
+                         {
+                             "id":  "CanViewSystemFolders",
+                             "bit":  22,
+                             "maskHex":  "0x0000000000400000",
+                             "status":  "published",
+                             "protoField":  "can_view_system_folders:23",
+                             "description":  "View approved system folders."
+                         },
+                         {
+                             "id":  "CanManageAdministrators",
+                             "bit":  23,
+                             "maskHex":  "0x0000000000800000",
+                             "status":  "published",
+                             "protoField":  "can_manage_administrators:24",
+                             "description":  "Manage administrator accounts."
+                         },
+                         {
+                             "id":  "CanManageScreeningStaff",
+                             "bit":  24,
+                             "maskHex":  "0x0000000001000000",
+                             "status":  "published",
+                             "protoField":  "can_manage_screening_staff:25",
+                             "description":  "Manage screening-staff accounts."
+                         },
+                         {
+                             "id":  "CanManageServiceTechs",
+                             "bit":  25,
+                             "maskHex":  "0x0000000002000000",
+                             "status":  "published",
+                             "protoField":  "can_manage_service_techs:26",
+                             "description":  "Manage service-technician accounts."
+                         },
+                         {
+                             "id":  "CanManageSuperusers",
+                             "bit":  26,
+                             "maskHex":  "0x0000000004000000",
+                             "status":  "published",
+                             "protoField":  "can_manage_superusers:27",
+                             "description":  "Manage legacy superuser accounts."
+                         },
+                         {
+                             "id":  "CanManageTesters",
+                             "bit":  27,
+                             "maskHex":  "0x0000000008000000",
+                             "status":  "published",
+                             "protoField":  "can_manage_testers:28",
+                             "description":  "Manage tester accounts."
+                         },
+                         {
+                             "id":  "CanEditUserRole",
+                             "bit":  28,
+                             "maskHex":  "0x0000000010000000",
+                             "status":  "published",
+                             "protoField":  "can_edit_user_role:29",
+                             "description":  "Change a managed user role."
+                         },
+                         {
+                             "id":  "HasLabQaTools",
+                             "bit":  29,
+                             "maskHex":  "0x0000000020000000",
+                             "status":  "published-bundle-marker",
+                             "protoField":  "user_details.has_lab_qa_tools:14",
+                             "description":  "Select the Lab/QA compatibility bundle."
+                         },
+                         {
+                             "id":  "HasServiceMaintenanceTools",
+                             "bit":  30,
+                             "maskHex":  "0x0000000040000000",
+                             "status":  "published-bundle-marker",
+                             "protoField":  "user_details.has_service_maintenance_tools:15",
+                             "description":  "Select the Service/Maintenance compatibility bundle."
+                         },
+                         {
+                             "id":  "CanExportReports",
+                             "bit":  31,
+                             "maskHex":  "0x0000000080000000",
+                             "status":  "planned-append-only",
+                             "protoField":  "access_policy.can_export_reports:31",
+                             "description":  "Export a controlled report."
+                         },
+                         {
+                             "id":  "CanPrintReports",
+                             "bit":  32,
+                             "maskHex":  "0x0000000100000000",
+                             "status":  "planned-append-only",
+                             "protoField":  "access_policy.can_print_reports:32",
+                             "description":  "Submit a controlled report to a printer."
+                         }
+                     ],
+    "roles":  [
+                  {
+                      "id":  "operator",
+                      "displayName":  "Operator",
+                      "capabilityIds":  [
+                                            "CanLogonLogoff",
+                                            "CanAnalyzeSamples",
+                                            "CanAccessAlarms",
+                                            "CanViewSubstanceLibrary"
+                                        ],
+                      "evidenceId":  "FRD-133-APPENDIX-C+OWNER-ATTESTATION-2026-11-18"
+                  },
+                  {
+                      "id":  "supervisor",
+                      "displayName":  "Supervisor",
+                      "capabilityIds":  [
+                                            "CanLogonLogoff",
+                                            "CanAnalyzeSamples",
+                                            "CanAccessAlarms",
+                                            "CanViewSubstanceLibrary",
+                                            "CanShutdownReboot",
+                                            "CanEditAudibleAlarms",
+                                            "CanEnableDisablePrinting",
+                                            "CanAccessSamplingDataSystemStatus",
+                                            "CanAccessReports",
+                                            "CanManageData",
+                                            "CanCopyDataToUsb",
+                                            "CanExportSamplingData",
+                                            "CanManageScreeningStaff",
+                                            "CanEditUserRole",
+                                            "CanExportReports",
+                                            "CanPrintReports"
+                                        ],
+                      "evidenceId":  "FRD-133-APPENDIX-C+OWNER-ATTESTATION-2026-11-18"
+                  },
+                  {
+                      "id":  "administrator",
+                      "displayName":  "Administrator",
+                      "capabilityIds":  [
+                                            "CanShutdownReboot",
+                                            "CanLogonLogoff",
+                                            "CanAnalyzeSamples",
+                                            "CanAccessAlarms",
+                                            "CanEditAudibleAlarms",
+                                            "CanViewSubstanceLibrary",
+                                            "CanEditSubstanceLibrary",
+                                            "CanSelectDetectionAlgorithm",
+                                            "CanDoSubstanceTraining",
+                                            "CanEnableDisablePrinting",
+                                            "CanAccessInstrumentConfiguration",
+                                            "CanAccessSamplingDataSystemStatus",
+                                            "CanAccessReports",
+                                            "CanEditSecurityFooter",
+                                            "CanDoMaintenance",
+                                            "CanCleanSystem",
+                                            "CanAutoCalibrate",
+                                            "CanManuallyCalibrate",
+                                            "CanManageData",
+                                            "CanCopyDataToUsb",
+                                            "CanExportSamplingData",
+                                            "CanUpgradeSoftware",
+                                            "CanViewSystemFolders",
+                                            "CanManageAdministrators",
+                                            "CanManageScreeningStaff",
+                                            "CanManageServiceTechs",
+                                            "CanManageSuperusers",
+                                            "CanManageTesters",
+                                            "CanEditUserRole",
+                                            "CanExportReports",
+                                            "CanPrintReports"
+                                        ],
+                      "evidenceId":  "FRD-133-APPENDIX-C+OWNER-ATTESTATION-2026-11-18"
+                  }
+              ],
+    "bundles":  [
+                    {
+                        "id":  "none",
+                        "capabilityIds":  [
+
+                                          ],
+                        "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
+                    },
+                    {
+                        "id":  "lab-qa",
+                        "capabilityIds":  [
+                                              "CanViewSubstanceLibrary",
+                                              "CanEditSubstanceLibrary",
+                                              "CanSelectDetectionAlgorithm",
+                                              "CanDoSubstanceTraining",
+                                              "CanAccessInstrumentConfiguration",
+                                              "CanAccessSamplingDataSystemStatus"
+                                          ],
+                        "evidenceId":  "CURRENT-RESOLVER-BASELINE-2026-11-19"
+                    },
+                    {
+                        "id":  "service-maintenance",
+                        "capabilityIds":  [
+                                              "CanAccessInstrumentConfiguration",
+                                              "CanAccessSamplingDataSystemStatus",
+                                              "CanDoMaintenance",
+                                              "CanCleanSystem",
+                                              "CanAutoCalibrate",
+                                              "CanManuallyCalibrate",
+                                              "CanUpgradeSoftware",
+                                              "CanViewSystemFolders"
+                                          ],
+                        "evidenceId":  "CURRENT-RESOLVER-BASELINE-2026-11-19"
+                    },
+                    {
+                        "id":  "lab-qa+service-maintenance",
+                        "capabilityIds":  [
+                                              "CanViewSubstanceLibrary",
+                                              "CanEditSubstanceLibrary",
+                                              "CanSelectDetectionAlgorithm",
+                                              "CanDoSubstanceTraining",
+                                              "CanAccessInstrumentConfiguration",
+                                              "CanAccessSamplingDataSystemStatus",
+                                              "CanDoMaintenance",
+                                              "CanCleanSystem",
+                                              "CanAutoCalibrate",
+                                              "CanManuallyCalibrate",
+                                              "CanUpgradeSoftware",
+                                              "CanViewSystemFolders"
+                                          ],
+                        "evidenceId":  "CURRENT-RESOLVER-BASELINE-2026-11-19"
+                    }
+                ],
+    "operations":  [
+                       {
+                           "auditOrdinal":  1,
+                           "auditName":  "ReportSurfaceAccess",
+                           "operationId":  "report-surface-access",
+                           "description":  "Enter or view the report surface.",
+                           "capabilityExpression":  "CanAccessReports",
+                           "requiredCapabilities":  [
+                                                        "CanAccessReports"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "product-navigation-and-service-deep-link",
+                           "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
+                       },
+                       {
+                           "auditOrdinal":  2,
+                           "auditName":  "EquipmentReportGeneration",
+                           "operationId":  "equipment-report-generation",
+                           "description":  "Generate an Equipment report.",
+                           "capabilityExpression":  "CanAccessReports",
+                           "requiredCapabilities":  [
+                                                        "CanAccessReports"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "service-before-source-retrieval",
+                           "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
+                       },
+                       {
+                           "auditOrdinal":  3,
+                           "auditName":  "EventReportGeneration",
+                           "operationId":  "event-report-generation",
+                           "description":  "Generate an Event report.",
+                           "capabilityExpression":  "CanAccessReports",
+                           "requiredCapabilities":  [
+                                                        "CanAccessReports"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "service-before-source-retrieval",
+                           "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
+                       },
+                       {
+                           "auditOrdinal":  4,
+                           "auditName":  "UserReportGeneration",
+                           "operationId":  "user-report-generation",
+                           "description":  "Generate a User report.",
+                           "capabilityExpression":  "CanAccessReports",
+                           "requiredCapabilities":  [
+                                                        "CanAccessReports"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "service-before-source-retrieval",
+                           "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
+                       },
+                       {
+                           "auditOrdinal":  5,
+                           "auditName":  "CompletedReportView",
+                           "operationId":  "completed-report-view",
+                           "description":  "View an already generated report.",
+                           "capabilityExpression":  "CanAccessReports",
+                           "requiredCapabilities":  [
+                                                        "CanAccessReports"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "product-before-content-disclosure",
+                           "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
+                       },
+                       {
+                           "auditOrdinal":  6,
+                           "auditName":  "ReportExport",
+                           "operationId":  "report-export",
+                           "description":  "Export a controlled report.",
+                           "capabilityExpression":  "CanExportReports",
+                           "requiredCapabilities":  [
+                                                        "CanExportReports"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "product-before-atomic-replacement",
+                           "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
+                       },
+                       {
+                           "auditOrdinal":  7,
+                           "auditName":  "ReportPrint",
+                           "operationId":  "report-print",
+                           "description":  "Submit a controlled report for printing.",
+                           "capabilityExpression":  "CanPrintReports",
+                           "requiredCapabilities":  [
+                                                        "CanPrintReports"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "product-before-spool-submission",
+                           "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
+                       },
+                       {
+                           "auditOrdinal":  8,
+                           "auditName":  "PrintSettingsChange",
+                           "operationId":  "print-settings-change",
+                           "description":  "Change printer settings.",
+                           "capabilityExpression":  "CanEnableDisablePrinting",
+                           "requiredCapabilities":  [
+                                                        "CanEnableDisablePrinting"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  9,
+                           "auditName":  "AutoPrintSettingsChange",
+                           "operationId":  "auto-print-settings-change",
+                           "description":  "Change auto-print settings.",
+                           "capabilityExpression":  "CanEnableDisablePrinting",
+                           "requiredCapabilities":  [
+                                                        "CanEnableDisablePrinting"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  10,
+                           "auditName":  "SsiStatementEdit",
+                           "operationId":  "ssi-statement-edit",
+                           "description":  "Edit the controlled SSI statement.",
+                           "capabilityExpression":  "CanEditSecurityFooter",
+                           "requiredCapabilities":  [
+                                                        "CanEditSecurityFooter"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-setting-mutation",
+                           "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
+                       },
+                       {
+                           "auditOrdinal":  11,
+                           "auditName":  "ShutdownOrReboot",
+                           "operationId":  "shutdown-or-reboot",
+                           "description":  "Shut down or reboot the instrument.",
+                           "capabilityExpression":  "CanShutdownReboot",
+                           "requiredCapabilities":  [
+                                                        "CanShutdownReboot"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  12,
+                           "auditName":  "SessionLogonOrLogoff",
+                           "operationId":  "session-logon-or-logoff",
+                           "description":  "Start or end an authenticated session.",
+                           "capabilityExpression":  "CanLogonLogoff",
+                           "requiredCapabilities":  [
+                                                        "CanLogonLogoff"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  13,
+                           "auditName":  "SampleAnalysis",
+                           "operationId":  "sample-analysis",
+                           "description":  "Analyze a sample.",
+                           "capabilityExpression":  "CanAnalyzeSamples",
+                           "requiredCapabilities":  [
+                                                        "CanAnalyzeSamples"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  14,
+                           "auditName":  "AlarmAccess",
+                           "operationId":  "alarm-access",
+                           "description":  "Access alarm information.",
+                           "capabilityExpression":  "CanAccessAlarms",
+                           "requiredCapabilities":  [
+                                                        "CanAccessAlarms"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  15,
+                           "auditName":  "AudibleAlarmSettingsEdit",
+                           "operationId":  "audible-alarm-settings-edit",
+                           "description":  "Change audible-alarm settings.",
+                           "capabilityExpression":  "CanEditAudibleAlarms",
+                           "requiredCapabilities":  [
+                                                        "CanEditAudibleAlarms"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  16,
+                           "auditName":  "SubstanceLibraryView",
+                           "operationId":  "substance-library-view",
+                           "description":  "View the substance library.",
+                           "capabilityExpression":  "CanViewSubstanceLibrary",
+                           "requiredCapabilities":  [
+                                                        "CanViewSubstanceLibrary"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  17,
+                           "auditName":  "SubstanceLibraryEdit",
+                           "operationId":  "substance-library-edit",
+                           "description":  "Edit the substance library.",
+                           "capabilityExpression":  "CanEditSubstanceLibrary",
+                           "requiredCapabilities":  [
+                                                        "CanEditSubstanceLibrary"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  18,
+                           "auditName":  "DetectionAlgorithmSelection",
+                           "operationId":  "detection-algorithm-selection",
+                           "description":  "Select a detection algorithm.",
+                           "capabilityExpression":  "CanSelectDetectionAlgorithm",
+                           "requiredCapabilities":  [
+                                                        "CanSelectDetectionAlgorithm"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  19,
+                           "auditName":  "SubstanceTraining",
+                           "operationId":  "substance-training",
+                           "description":  "Train a substance.",
+                           "capabilityExpression":  "CanDoSubstanceTraining",
+                           "requiredCapabilities":  [
+                                                        "CanDoSubstanceTraining"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  20,
+                           "auditName":  "InstrumentConfigurationChange",
+                           "operationId":  "instrument-configuration-change",
+                           "description":  "Change instrument configuration.",
+                           "capabilityExpression":  "CanAccessInstrumentConfiguration",
+                           "requiredCapabilities":  [
+                                                        "CanAccessInstrumentConfiguration"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  21,
+                           "auditName":  "SamplingDataSystemStatusView",
+                           "operationId":  "sampling-data-system-status-view",
+                           "description":  "View sampling-data system status.",
+                           "capabilityExpression":  "CanAccessSamplingDataSystemStatus",
+                           "requiredCapabilities":  [
+                                                        "CanAccessSamplingDataSystemStatus"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  22,
+                           "auditName":  "MaintenanceExecution",
+                           "operationId":  "maintenance-execution",
+                           "description":  "Execute maintenance.",
+                           "capabilityExpression":  "CanDoMaintenance",
+                           "requiredCapabilities":  [
+                                                        "CanDoMaintenance"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  23,
+                           "auditName":  "SystemCleaning",
+                           "operationId":  "system-cleaning",
+                           "description":  "Clean the system.",
+                           "capabilityExpression":  "CanCleanSystem",
+                           "requiredCapabilities":  [
+                                                        "CanCleanSystem"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  24,
+                           "auditName":  "AutomaticCalibration",
+                           "operationId":  "automatic-calibration",
+                           "description":  "Run automatic calibration.",
+                           "capabilityExpression":  "CanAutoCalibrate",
+                           "requiredCapabilities":  [
+                                                        "CanAutoCalibrate"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  25,
+                           "auditName":  "ManualCalibration",
+                           "operationId":  "manual-calibration",
+                           "description":  "Run manual calibration.",
+                           "capabilityExpression":  "CanManuallyCalibrate",
+                           "requiredCapabilities":  [
+                                                        "CanManuallyCalibrate"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  26,
+                           "auditName":  "DataManagement",
+                           "operationId":  "data-management",
+                           "description":  "Manage retained data.",
+                           "capabilityExpression":  "CanManageData",
+                           "requiredCapabilities":  [
+                                                        "CanManageData"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  27,
+                           "auditName":  "SamplingDataCopyToUsb",
+                           "operationId":  "sampling-data-copy-to-usb",
+                           "description":  "Copy sampling data to attached storage.",
+                           "capabilityExpression":  "CanCopyDataToUsb",
+                           "requiredCapabilities":  [
+                                                        "CanCopyDataToUsb"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  28,
+                           "auditName":  "SamplingDataExport",
+                           "operationId":  "sampling-data-export",
+                           "description":  "Export sampling data.",
+                           "capabilityExpression":  "CanExportSamplingData",
+                           "requiredCapabilities":  [
+                                                        "CanExportSamplingData"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  29,
+                           "auditName":  "SoftwareUpgrade",
+                           "operationId":  "software-upgrade",
+                           "description":  "Upgrade software.",
+                           "capabilityExpression":  "CanUpgradeSoftware",
+                           "requiredCapabilities":  [
+                                                        "CanUpgradeSoftware"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  30,
+                           "auditName":  "SystemFoldersView",
+                           "operationId":  "system-folders-view",
+                           "description":  "View approved system folders.",
+                           "capabilityExpression":  "CanViewSystemFolders",
+                           "requiredCapabilities":  [
+                                                        "CanViewSystemFolders"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  31,
+                           "auditName":  "UserPolicyInspection",
+                           "operationId":  "user-policy-inspection",
+                           "description":  "Inspect a managed user policy.",
+                           "capabilityExpression":  "Any(CanManageAdministrators,CanManageScreeningStaff,CanManageServiceTechs)",
+                           "requiredCapabilities":  [
+                                                        "CanManageAdministrators",
+                                                        "CanManageScreeningStaff",
+                                                        "CanManageServiceTechs"
+                                                    ],
+                           "expressionMode":  "any",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  32,
+                           "auditName":  "ManagedUserCreate",
+                           "operationId":  "managed-user-create",
+                           "description":  "Create a managed user.",
+                           "capabilityExpression":  "Any(CanManageAdministrators,CanManageScreeningStaff,CanManageServiceTechs)",
+                           "requiredCapabilities":  [
+                                                        "CanManageAdministrators",
+                                                        "CanManageScreeningStaff",
+                                                        "CanManageServiceTechs"
+                                                    ],
+                           "expressionMode":  "any",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  33,
+                           "auditName":  "ManagedUserEdit",
+                           "operationId":  "managed-user-edit",
+                           "description":  "Edit a managed user.",
+                           "capabilityExpression":  "Any(CanManageAdministrators,CanManageScreeningStaff,CanManageServiceTechs)",
+                           "requiredCapabilities":  [
+                                                        "CanManageAdministrators",
+                                                        "CanManageScreeningStaff",
+                                                        "CanManageServiceTechs"
+                                                    ],
+                           "expressionMode":  "any",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  34,
+                           "auditName":  "ManagedUserEnableOrDisable",
+                           "operationId":  "managed-user-enable-or-disable",
+                           "description":  "Enable or disable a managed user.",
+                           "capabilityExpression":  "Any(CanManageAdministrators,CanManageScreeningStaff,CanManageServiceTechs)",
+                           "requiredCapabilities":  [
+                                                        "CanManageAdministrators",
+                                                        "CanManageScreeningStaff",
+                                                        "CanManageServiceTechs"
+                                                    ],
+                           "expressionMode":  "any",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  35,
+                           "auditName":  "ManagedUserCredentialReset",
+                           "operationId":  "managed-user-credential-reset",
+                           "description":  "Reset managed-user credentials.",
+                           "capabilityExpression":  "Any(CanManageAdministrators,CanManageScreeningStaff,CanManageServiceTechs)",
+                           "requiredCapabilities":  [
+                                                        "CanManageAdministrators",
+                                                        "CanManageScreeningStaff",
+                                                        "CanManageServiceTechs"
+                                                    ],
+                           "expressionMode":  "any",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  36,
+                           "auditName":  "ManagedUserMfaReset",
+                           "operationId":  "managed-user-mfa-reset",
+                           "description":  "Reset managed-user MFA.",
+                           "capabilityExpression":  "Any(CanManageAdministrators,CanManageScreeningStaff,CanManageServiceTechs)",
+                           "requiredCapabilities":  [
+                                                        "CanManageAdministrators",
+                                                        "CanManageScreeningStaff",
+                                                        "CanManageServiceTechs"
+                                                    ],
+                           "expressionMode":  "any",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  37,
+                           "auditName":  "ManagedUserDelete",
+                           "operationId":  "managed-user-delete",
+                           "description":  "Delete a managed user.",
+                           "capabilityExpression":  "Any(CanManageAdministrators,CanManageScreeningStaff,CanManageServiceTechs)",
+                           "requiredCapabilities":  [
+                                                        "CanManageAdministrators",
+                                                        "CanManageScreeningStaff",
+                                                        "CanManageServiceTechs"
+                                                    ],
+                           "expressionMode":  "any",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  38,
+                           "auditName":  "ManagedUserRoleChange",
+                           "operationId":  "managed-user-role-change",
+                           "description":  "Change a managed user role.",
+                           "capabilityExpression":  "CanEditUserRole",
+                           "requiredCapabilities":  [
+                                                        "CanEditUserRole"
+                                                    ],
+                           "expressionMode":  "all",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       },
+                       {
+                           "auditOrdinal":  39,
+                           "auditName":  "ManagedUserAccessTokenRevoke",
+                           "operationId":  "managed-user-access-token-revoke",
+                           "description":  "Revoke a managed user access token.",
+                           "capabilityExpression":  "Any(CanManageAdministrators,CanManageScreeningStaff,CanManageServiceTechs)",
+                           "requiredCapabilities":  [
+                                                        "CanManageAdministrators",
+                                                        "CanManageScreeningStaff",
+                                                        "CanManageServiceTechs"
+                                                    ],
+                           "expressionMode":  "any",
+                           "enforcementBoundary":  "authoritative-service-before-operation",
+                           "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
+                       }
+                   ],
+    "policyStates":  [
+                         "allowed",
+                         "denied",
+                         "reauthentication-required",
+                         "policy-unavailable",
+                         "prerequisite-unmet"
+                     ],
+    "unknownCodeFallback":  {
+                                "effectiveDecision":  "denied",
+                                "guidanceCategory":  "unknown-code",
+                                "retryDisposition":  "do-not-retry",
+                                "presentationProjection":  "visible-disabled",
+                                "protectedContentDisposition":  "remove",
+                                "focusDisposition":  "restore-stable-target",
+                                "statusAnnouncement":  "announce-neutral-unknown-code"
+                            },
+    "rollingUpgrade":  {
+                           "unknownBits":  "deny",
+                           "unknownRoles":  "deny",
+                           "conflictingBaseRoles":  "deny",
+                           "bundleWithoutBaseRole":  "deny",
+                           "unsupportedSchemaVersion":  "deny",
+                           "cachedUiMayAuthorize":  false
+                       }
+}

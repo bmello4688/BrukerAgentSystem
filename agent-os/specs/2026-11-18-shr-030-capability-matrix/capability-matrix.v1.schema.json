@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bruker.invalid/schemas/user-management/capability-matrix.v1.schema.json",
+  "title": "Bruker User Management Capability Matrix v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "policyId",
+    "rowCount",
+    "dimensions",
+    "rows"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "policyId": { "const": "bruker.user-management.capability-matrix.v1" },
+    "rowCount": { "const": 2340 },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roles", "bundleSets", "operations", "policyStates"],
+      "properties": {
+        "roles": { "const": 3 },
+        "bundleSets": { "const": 4 },
+        "operations": { "const": 39 },
+        "policyStates": { "const": 5 }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "minItems": 2340,
+      "maxItems": 2340,
+      "items": { "$ref": "#/$defs/decision" }
+    }
+  },
+  "$defs": {
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "operationId",
+        "auditOperationOrdinal",
+        "capabilityExpression",
+        "baseRole",
+        "bundleSet",
+        "roleDecision",
+        "policyState",
+        "effectiveDecision",
+        "guidanceCategory",
+        "retryDisposition",
+        "presentationProjection",
+        "protectedContentDisposition",
+        "focusDisposition",
+        "statusAnnouncement",
+        "enforcementBoundary",
+        "evidenceId"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "operationId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{2,63}$" },
+        "auditOperationOrdinal": { "type": "integer", "minimum": 1, "maximum": 39 },
+        "capabilityExpression": { "type": "string", "minLength": 1, "maxLength": 255 },
+        "baseRole": { "enum": ["operator", "supervisor", "administrator"] },
+        "bundleSet": { "enum": ["none", "lab-qa", "service-maintenance", "lab-qa+service-maintenance"] },
+        "roleDecision": { "enum": ["allowed", "denied"] },
+        "policyState": { "enum": ["allowed", "denied", "reauthentication-required", "policy-unavailable", "prerequisite-unmet"] },
+        "effectiveDecision": { "enum": ["allowed", "denied", "reauthentication-required", "policy-unavailable", "prerequisite-unmet"] },
+        "guidanceCategory": { "enum": ["none", "authorization-denied", "reauthenticate", "retry-when-ready", "correct-input", "unknown-code"] },
+        "retryDisposition": { "enum": ["none", "retry", "correct-request", "reauthenticate", "do-not-retry"] },
+        "presentationProjection": { "enum": ["visible-enabled", "visible-disabled", "visible-disabled-prerequisite", "hidden-reject-deep-link", "absent-with-protected-surface"] },
+        "protectedContentDisposition": { "enum": ["retain", "remove"] },
+        "focusDisposition": { "enum": ["preserve", "restore-stable-target"] },
+        "statusAnnouncement": { "enum": ["none", "announce-neutral-denial", "announce-neutral-reauthentication", "announce-neutral-unavailable", "announce-neutral-prerequisite", "announce-neutral-unknown-code"] },
+        "enforcementBoundary": { "type": "string", "minLength": 1, "maxLength": 127 },
+        "evidenceId": { "type": "string", "minLength": 1, "maxLength": 255 }
+      }
+    }
+  }
+}
