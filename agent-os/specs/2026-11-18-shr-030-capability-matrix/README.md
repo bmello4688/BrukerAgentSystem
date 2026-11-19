@@ -58,6 +58,7 @@ Target role is not another matrix dimension: every role/operation decision resol
 - When report-surface access is denied, navigation is hidden, deep links are rejected, protected report content is removed, focus returns to a stable target, and neutral denial status is announced.
 - On an authorized report surface, an operation-specific denied or unmet-prerequisite generation/export/print/settings/SSI action remains non-authorizing and disabled with persistent accessible guidance outside the disabled control, while retaining the authorized report content.
 - Report-surface or completed-content access denial removes content. Reauthentication, logout, revocation, and policy-service loss also remove displayed content because the product can no longer establish report access.
+- Presentation evidence uses Supervisor rows and independently proves `report-surface-access` is allowed before evaluating policy denial. The SSI case separately proves Supervisor role denial on the same authorized report surface.
 - Hidden elements are absent from keyboard and automation traversal.
 - Logout, revocation, policy loss, and policy-service failure remove displayed protected report content immediately and require fresh authorization and generation.
 - Non-security prerequisites remain distinct from authorization denial.

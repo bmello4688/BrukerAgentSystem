@@ -168,14 +168,38 @@ try {
 
     Assert-Equal 7 @($failClosed.presentationCases).Count 'Presentation fixture count mismatch.'
     foreach ($case in $failClosed.presentationCases) {
+        Assert-Equal 'supervisor' $case.baseRole "Presentation fixture $($case.id) must use a report-authorized Supervisor."
+        Assert-Equal $true $case.requiresReportAccess "Presentation fixture $($case.id) must require independent report access."
+        $reportAccess = @($matrix.rows | Where-Object {
+            $_.baseRole -eq $case.baseRole -and $_.bundleSet -eq 'none' -and
+            $_.operationId -eq 'report-surface-access' -and $_.policyState -eq 'allowed'
+        })
+        Assert-Equal 1 $reportAccess.Count "Presentation fixture $($case.id) report-access proof did not resolve uniquely."
+        if ($reportAccess.Count -eq 1) {
+            Assert-Equal 'allowed' $reportAccess[0].roleDecision "Presentation fixture $($case.id) base role lacks report-access capability."
+            Assert-Equal 'allowed' $reportAccess[0].effectiveDecision "Presentation fixture $($case.id) cannot establish an authorized report surface."
+        }
         $matches = @($matrix.rows | Where-Object {
             $_.baseRole -eq $case.baseRole -and $_.bundleSet -eq 'none' -and
             $_.operationId -eq $case.operationId -and $_.policyState -eq $case.policyState
         })
         Assert-Equal 1 $matches.Count "Presentation fixture $($case.id) did not resolve uniquely."
         if ($matches.Count -eq 1) {
+            Assert-Equal $case.expectedRoleDecision $matches[0].roleDecision "Role decision mismatch for presentation fixture $($case.id)."
+            Assert-Equal 'denied' $matches[0].effectiveDecision "Presentation fixture $($case.id) must resolve to a denial."
             Assert-Equal $case.expectedProjection $matches[0].presentationProjection "Presentation projection mismatch for $($case.id)."
             Assert-Equal $case.expectedContentDisposition $matches[0].protectedContentDisposition "Protected-content disposition mismatch for $($case.id)."
+        }
+        if ($case.denialSource -eq 'policy') {
+            Assert-Equal 'denied' $case.policyState "Policy-denial fixture $($case.id) must use the denied policy state."
+            Assert-Equal 'allowed' $case.expectedRoleDecision "Policy-denial fixture $($case.id) must prove role authorization before policy denial."
+        }
+        elseif ($case.denialSource -eq 'role') {
+            Assert-Equal 'allowed' $case.policyState "Role-denial fixture $($case.id) must use the allowed policy state."
+            Assert-Equal 'denied' $case.expectedRoleDecision "Role-denial fixture $($case.id) must prove capability denial."
+        }
+        else {
+            $failures.Add("Presentation fixture $($case.id) has unknown denial source '$($case.denialSource)'.")
         }
     }
 

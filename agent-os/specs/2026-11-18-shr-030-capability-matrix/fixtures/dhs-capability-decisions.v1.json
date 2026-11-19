@@ -5,7 +5,7 @@
     "decisionSource":  "../capability-matrix.v1.json",
     "canonicalMatrixSha256":  "609c4f45523c193203b30d96c5f83d5335e88cf5e00f171b0d296a59a521a7aa",
     "failClosedSource":  "fail-closed-inputs.v1.json",
-    "failClosedSha256":  "b072ce31b891ee7af32e1eb4e438a10d45fe2bbe43e6cfcd353669e9ee196de7",
+    "failClosedSha256":  "08a4869126f1e868e5d3b65bf95269f1bdbe2f92688b02d62da38664c14b8d9b",
     "scenarioCount":  2340,
     "roles":  [
                   "operator",

@@ -117,7 +117,7 @@ Validate schema, canonical CSV/JSON equivalence, exhaustive matrix/alias/bundle/
 - Published SHR-014A alignment: all 39 operation names and ordinals match Common.Reports `743a65b40d9351bfd296ad477c9bd51f184948fb`.
 - Matrix coverage: 3 roles x 4 bundle sets x 39 operations x 5 policy states = 2,340 unique decisions.
 - Each decision resolves one of 11 structured target-scope policies without adding a target dimension. The schema therefore remains 2,340 exhaustive decisions while requiring 18 semantic fields per row.
-- Seven explicit presentation fixtures prove that action/settings denial retains an authorized report while report-surface/completed-view denial removes content. Four target-scope fixtures prove Supervisor Operator-only management, prohibited Supervisor role changes, and Administrator safeguards.
+- Seven explicit presentation fixtures begin with independently proven Supervisor report access. Six policy-denial fixtures prove action/settings denial retains an authorized report while report-surface/completed-view denial removes content; the seventh separately proves Supervisor SSI role denial retains that authorized report. Four target-scope fixtures prove Supervisor Operator-only management, prohibited Supervisor role changes, and Administrator safeguards.
 - Canonical CSV and JSON regenerate byte-for-byte from the checked-in generator and validate identically.
 - DHS and TripleQuadUI parity manifests bind the same matrix and fail-closed fixture hashes.
 - Existing UserRights bit positions and AccessPolicy proto fields remain read-only and unchanged; planned report export/print additions are append-only bits/fields 31 and 32.
