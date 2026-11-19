@@ -42,6 +42,7 @@
         "operationId",
         "auditOperationOrdinal",
         "capabilityExpression",
+        "targetScopePolicyId",
         "baseRole",
         "bundleSet",
         "roleDecision",
@@ -61,6 +62,21 @@
         "operationId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{2,63}$" },
         "auditOperationOrdinal": { "type": "integer", "minimum": 1, "maximum": 39 },
         "capabilityExpression": { "type": "string", "minLength": 1, "maxLength": 255 },
+        "targetScopePolicyId": {
+          "enum": [
+            "not-applicable",
+            "deny",
+            "supervisor-operator-target-read",
+            "supervisor-create-operator-no-specialist",
+            "supervisor-edit-operator-no-access-mutation",
+            "supervisor-operator-target-mutation",
+            "administrator-selectable-target-read",
+            "administrator-create-selectable",
+            "administrator-edit-selectable-with-safeguards",
+            "administrator-selectable-target-mutation",
+            "administrator-role-change-with-safeguards"
+          ]
+        },
         "baseRole": { "enum": ["operator", "supervisor", "administrator"] },
         "bundleSet": { "enum": ["none", "lab-qa", "service-maintenance", "lab-qa+service-maintenance"] },
         "roleDecision": { "enum": ["allowed", "denied"] },

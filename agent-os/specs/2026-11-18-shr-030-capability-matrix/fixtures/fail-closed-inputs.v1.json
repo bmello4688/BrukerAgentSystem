@@ -143,6 +143,105 @@
                                   ],
                       "input":  "future-guidance",
                       "expected":  "deny"
+                  },
+                  {
+                      "id":  "unknown-target-scope-policy",
+                      "baseRoles":  [
+                                        "administrator"
+                                    ],
+                      "bundles":  [
+
+                                  ],
+                      "input":  "future-target-scope",
+                      "expected":  "deny"
                   }
-              ]
+              ],
+    "presentationCases":  [
+                              {
+                                  "id":  "report-surface-denied-removes-content",
+                                  "baseRole":  "operator",
+                                  "operationId":  "report-surface-access",
+                                  "policyState":  "allowed",
+                                  "expectedProjection":  "hidden-reject-deep-link",
+                                  "expectedContentDisposition":  "remove"
+                              },
+                              {
+                                  "id":  "completed-report-view-denied-removes-content",
+                                  "baseRole":  "operator",
+                                  "operationId":  "completed-report-view",
+                                  "policyState":  "allowed",
+                                  "expectedProjection":  "absent-with-protected-surface",
+                                  "expectedContentDisposition":  "remove"
+                              },
+                              {
+                                  "id":  "export-denied-retains-authorized-report",
+                                  "baseRole":  "operator",
+                                  "operationId":  "report-export",
+                                  "policyState":  "allowed",
+                                  "expectedProjection":  "visible-disabled",
+                                  "expectedContentDisposition":  "retain"
+                              },
+                              {
+                                  "id":  "print-denied-retains-authorized-report",
+                                  "baseRole":  "operator",
+                                  "operationId":  "report-print",
+                                  "policyState":  "allowed",
+                                  "expectedProjection":  "visible-disabled",
+                                  "expectedContentDisposition":  "retain"
+                              },
+                              {
+                                  "id":  "print-settings-denied-retains-authorized-report",
+                                  "baseRole":  "operator",
+                                  "operationId":  "print-settings-change",
+                                  "policyState":  "allowed",
+                                  "expectedProjection":  "visible-disabled",
+                                  "expectedContentDisposition":  "retain"
+                              },
+                              {
+                                  "id":  "auto-print-settings-denied-retains-authorized-report",
+                                  "baseRole":  "operator",
+                                  "operationId":  "auto-print-settings-change",
+                                  "policyState":  "allowed",
+                                  "expectedProjection":  "visible-disabled",
+                                  "expectedContentDisposition":  "retain"
+                              },
+                              {
+                                  "id":  "ssi-edit-denied-retains-authorized-report",
+                                  "baseRole":  "supervisor",
+                                  "operationId":  "ssi-statement-edit",
+                                  "policyState":  "allowed",
+                                  "expectedProjection":  "visible-disabled",
+                                  "expectedContentDisposition":  "retain"
+                              }
+                          ],
+    "targetScopeCases":  [
+                             {
+                                 "id":  "supervisor-create-operator-only",
+                                 "baseRole":  "supervisor",
+                                 "operationId":  "managed-user-create",
+                                 "expectedRoleDecision":  "allowed",
+                                 "expectedTargetScopePolicyId":  "supervisor-create-operator-no-specialist"
+                             },
+                             {
+                                 "id":  "supervisor-edit-operator-without-access-mutation",
+                                 "baseRole":  "supervisor",
+                                 "operationId":  "managed-user-edit",
+                                 "expectedRoleDecision":  "allowed",
+                                 "expectedTargetScopePolicyId":  "supervisor-edit-operator-no-access-mutation"
+                             },
+                             {
+                                 "id":  "supervisor-role-change-denied",
+                                 "baseRole":  "supervisor",
+                                 "operationId":  "managed-user-role-change",
+                                 "expectedRoleDecision":  "denied",
+                                 "expectedTargetScopePolicyId":  "deny"
+                             },
+                             {
+                                 "id":  "administrator-role-change-safeguarded",
+                                 "baseRole":  "administrator",
+                                 "operationId":  "managed-user-role-change",
+                                 "expectedRoleDecision":  "allowed",
+                                 "expectedTargetScopePolicyId":  "administrator-role-change-with-safeguards"
+                             }
+                         ]
 }

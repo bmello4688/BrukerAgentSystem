@@ -59,6 +59,27 @@ try {
     Assert-Equal 3 @($catalog.roles).Count 'Exactly three selectable base roles are allowed.'
     Assert-Equal 4 @($catalog.bundles).Count 'Four bundle-set combinations are required.'
     Assert-Equal 5 @($catalog.policyStates).Count 'Five typed policy states are required.'
+    Assert-Equal 11 @($catalog.targetScopePolicies).Count 'Target-scope policy catalog is incomplete.'
+    Assert-Equal 11 @($catalog.targetScopePolicies.id | Select-Object -Unique).Count 'Target-scope policy IDs must be unique.'
+    $selectableTargetRoles = @('operator','supervisor','administrator')
+    foreach ($targetPolicy in $catalog.targetScopePolicies) {
+        foreach ($targetRole in @($targetPolicy.allowedCurrentTargetRoles) + @($targetPolicy.allowedRequestedTargetRoles)) {
+            Assert-True ($targetRole -in $selectableTargetRoles) "Target-scope policy $($targetPolicy.id) contains unknown role '$targetRole'."
+        }
+    }
+    foreach ($operation in $catalog.operations) {
+        foreach ($baseRole in $selectableTargetRoles) {
+            $scopeId = $operation.targetScopePolicyByRole.$baseRole
+            Assert-True (-not [string]::IsNullOrWhiteSpace($scopeId)) "Operation $($operation.operationId) has no target scope for $baseRole."
+            Assert-True (@($catalog.targetScopePolicies | Where-Object { $_.id -eq $scopeId }).Count -eq 1) "Operation $($operation.operationId) has unknown target scope '$scopeId' for $baseRole."
+            if ($operation.auditOrdinal -le 30) {
+                Assert-Equal 'not-applicable' $scopeId "Non-user operation $($operation.operationId) must not declare managed-user target scope."
+            }
+            else {
+                Assert-True ($scopeId -ne 'not-applicable') "Managed-user operation $($operation.operationId) must declare target scope for $baseRole."
+            }
+        }
+    }
 
     $expectedRows = 3 * 4 * 39 * 5
     Assert-Equal $expectedRows $matrix.rowCount 'Canonical matrix rowCount mismatch.'
@@ -74,14 +95,16 @@ try {
         Assert-True (-not [string]::IsNullOrWhiteSpace($row.guidanceCategory)) "Missing guidance in $key."
         Assert-True (-not [string]::IsNullOrWhiteSpace($row.retryDisposition)) "Missing retry disposition in $key."
         Assert-True (-not [string]::IsNullOrWhiteSpace($row.presentationProjection)) "Missing presentation projection in $key."
+        Assert-True (-not [string]::IsNullOrWhiteSpace($row.targetScopePolicyId)) "Missing target-scope policy in $key."
+        Assert-True (@($catalog.targetScopePolicies | Where-Object { $_.id -eq $row.targetScopePolicyId }).Count -eq 1) "Unknown target-scope policy in $key."
     }
     Assert-Equal $expectedRows $keys.Count 'Composite matrix key coverage mismatch.'
 
     $csvJson = @($csvRows | ForEach-Object {
-        "$($_.baseRole)|$($_.bundleSet)|$($_.operationId)|$($_.policyState)|$($_.roleDecision)|$($_.effectiveDecision)|$($_.guidanceCategory)|$($_.retryDisposition)|$($_.presentationProjection)|$($_.protectedContentDisposition)|$($_.focusDisposition)|$($_.statusAnnouncement)"
+        "$($_.baseRole)|$($_.bundleSet)|$($_.operationId)|$($_.policyState)|$($_.roleDecision)|$($_.targetScopePolicyId)|$($_.effectiveDecision)|$($_.guidanceCategory)|$($_.retryDisposition)|$($_.presentationProjection)|$($_.protectedContentDisposition)|$($_.focusDisposition)|$($_.statusAnnouncement)"
     })
     $canonicalJson = @($matrix.rows | ForEach-Object {
-        "$($_.baseRole)|$($_.bundleSet)|$($_.operationId)|$($_.policyState)|$($_.roleDecision)|$($_.effectiveDecision)|$($_.guidanceCategory)|$($_.retryDisposition)|$($_.presentationProjection)|$($_.protectedContentDisposition)|$($_.focusDisposition)|$($_.statusAnnouncement)"
+        "$($_.baseRole)|$($_.bundleSet)|$($_.operationId)|$($_.policyState)|$($_.roleDecision)|$($_.targetScopePolicyId)|$($_.effectiveDecision)|$($_.guidanceCategory)|$($_.retryDisposition)|$($_.presentationProjection)|$($_.protectedContentDisposition)|$($_.focusDisposition)|$($_.statusAnnouncement)"
     })
     Assert-Equal (($canonicalJson | Sort-Object) -join "`n") (($csvJson | Sort-Object) -join "`n") 'CSV and canonical JSON decisions differ.'
 
@@ -107,6 +130,28 @@ try {
         Assert-Equal 'allowed' $administratorSsi.roleDecision "Administrator must be allowed SSI editing with $bundle."
     }
 
+    $reportActionAndSettingsIds = @(
+        'equipment-report-generation','event-report-generation','user-report-generation',
+        'report-export','report-print','print-settings-change','auto-print-settings-change','ssi-statement-edit'
+    )
+    $operationSpecificDeniedRows = @($matrix.rows | Where-Object {
+        $_.operationId -in $reportActionAndSettingsIds -and
+        $_.policyState -in @('allowed','denied') -and
+        $_.effectiveDecision -eq 'denied'
+    })
+    Assert-True ($operationSpecificDeniedRows.Count -gt 0) 'Missing operation-specific denied report action/settings decisions.'
+    foreach ($row in $operationSpecificDeniedRows) {
+        Assert-Equal 'retain' $row.protectedContentDisposition "Operation-specific denial must retain authorized report content for $($row.baseRole)|$($row.operationId)|$($row.policyState)."
+    }
+    $contentAccessDeniedRows = @($matrix.rows | Where-Object {
+        $_.operationId -in @('report-surface-access','completed-report-view') -and
+        $_.policyState -in @('allowed','denied') -and
+        $_.effectiveDecision -eq 'denied'
+    })
+    foreach ($row in $contentAccessDeniedRows) {
+        Assert-Equal 'remove' $row.protectedContentDisposition "Report-content access denial must remove protected content for $($row.baseRole)|$($row.operationId)|$($row.policyState)."
+    }
+
     $adminAllowed = @($matrix.rows | Where-Object { $_.baseRole -eq 'administrator' -and $_.bundleSet -eq 'none' -and $_.policyState -eq 'allowed' -and $_.roleDecision -eq 'allowed' })
     Assert-Equal 39 $adminAllowed.Count 'Administrator must use an explicit complete v1 operation set.'
 
@@ -116,10 +161,48 @@ try {
     Assert-True (@($aliases | Where-Object { $_.input -eq 'Commissioning' -and $_.valid -eq 'False' }).Count -eq 1) 'Commissioning must not become a selectable base role.'
 
     $failClosed = Get-Content -Raw (Join-Path $root 'fixtures\fail-closed-inputs.v1.json') | ConvertFrom-Json
-    Assert-Equal 12 @($failClosed.cases).Count 'Fail-closed fixture count mismatch.'
+    Assert-Equal 13 @($failClosed.cases).Count 'Fail-closed fixture count mismatch.'
     foreach ($case in $failClosed.cases) { Assert-Equal 'deny' $case.expected "Fail-closed case $($case.id) does not deny." }
     Assert-Equal 'unknown-code' $failClosed.fallback.guidanceCategory 'Unknown-code fallback mismatch.'
     Assert-Equal 'do-not-retry' $failClosed.fallback.retryDisposition 'Unknown-code retry mismatch.'
+
+    Assert-Equal 7 @($failClosed.presentationCases).Count 'Presentation fixture count mismatch.'
+    foreach ($case in $failClosed.presentationCases) {
+        $matches = @($matrix.rows | Where-Object {
+            $_.baseRole -eq $case.baseRole -and $_.bundleSet -eq 'none' -and
+            $_.operationId -eq $case.operationId -and $_.policyState -eq $case.policyState
+        })
+        Assert-Equal 1 $matches.Count "Presentation fixture $($case.id) did not resolve uniquely."
+        if ($matches.Count -eq 1) {
+            Assert-Equal $case.expectedProjection $matches[0].presentationProjection "Presentation projection mismatch for $($case.id)."
+            Assert-Equal $case.expectedContentDisposition $matches[0].protectedContentDisposition "Protected-content disposition mismatch for $($case.id)."
+        }
+    }
+
+    Assert-Equal 4 @($failClosed.targetScopeCases).Count 'Target-scope fixture count mismatch.'
+    foreach ($case in $failClosed.targetScopeCases) {
+        $matches = @($matrix.rows | Where-Object {
+            $_.baseRole -eq $case.baseRole -and $_.bundleSet -eq 'none' -and
+            $_.operationId -eq $case.operationId -and $_.policyState -eq 'allowed'
+        })
+        Assert-Equal 1 $matches.Count "Target-scope fixture $($case.id) did not resolve uniquely."
+        if ($matches.Count -eq 1) {
+            Assert-Equal $case.expectedRoleDecision $matches[0].roleDecision "Role decision mismatch for $($case.id)."
+            Assert-Equal $case.expectedTargetScopePolicyId $matches[0].targetScopePolicyId "Target-scope policy mismatch for $($case.id)."
+        }
+    }
+
+    $supervisorCreateScope = $catalog.targetScopePolicies | Where-Object { $_.id -eq 'supervisor-create-operator-no-specialist' }
+    Assert-Equal 'operator' ($supervisorCreateScope.allowedRequestedTargetRoles -join ',') 'Supervisor create scope must allow only Operator targets.'
+    Assert-Equal $false $supervisorCreateScope.mayChangeSpecialistCapabilities 'Supervisor create scope must prohibit specialist capabilities.'
+    $supervisorEditScope = $catalog.targetScopePolicies | Where-Object { $_.id -eq 'supervisor-edit-operator-no-access-mutation' }
+    Assert-Equal 'operator' ($supervisorEditScope.allowedCurrentTargetRoles -join ',') 'Supervisor edit scope must allow only Operator targets.'
+    Assert-Equal 'operator' ($supervisorEditScope.allowedRequestedTargetRoles -join ',') 'Supervisor edit scope must retain the Operator role.'
+    Assert-Equal $false $supervisorEditScope.mayChangeBaseRole 'Supervisor edit scope must prohibit role changes.'
+    Assert-Equal $false $supervisorEditScope.mayChangeSpecialistCapabilities 'Supervisor edit scope must prohibit specialist-capability changes.'
+    $administratorMutationScope = $catalog.targetScopePolicies | Where-Object { $_.id -eq 'administrator-selectable-target-mutation' }
+    Assert-Equal 'deny' $administratorMutationScope.selfAccessMutation 'Administrator managed-user mutations must deny self-access mutation.'
+    Assert-Equal 'preserve' $administratorMutationScope.finalActiveAdministrator 'Administrator managed-user mutations must preserve a final active Administrator.'
 
     $matrixHash = Get-Sha256 (Join-Path $root 'capability-matrix.v1.json')
     $failClosedHash = Get-Sha256 (Join-Path $root 'fixtures\fail-closed-inputs.v1.json')
@@ -173,6 +256,7 @@ try {
         $schema = Get-Content -Raw $schemaPath | ConvertFrom-Json
         Assert-Equal 'https://json-schema.org/draft/2020-12/schema' $schema.'$schema' 'Unexpected JSON Schema dialect.'
         Assert-Equal 1 $schema.properties.schemaVersion.const 'Schema must freeze version 1.'
+        Assert-Equal 18 @($schema.'$defs'.decision.required).Count 'Decision schema must require all 18 semantic fields.'
     }
 }
 finally {
@@ -189,3 +273,4 @@ Write-Output '  39 operations aligned with published SHR-014A.'
 Write-Output '  2,340 exhaustive role/bundle/operation/policy decisions.'
 Write-Output '  Canonical CSV/JSON and DHS/TripleQuadUI parity fixtures match.'
 Write-Output '  Alias, bundle-only, conflicting-role, unknown-bit, unknown-code, and presentation rules fail closed.'
+Write-Output '  Managed-user target-role and access-mutation scope is explicit and fail closed.'

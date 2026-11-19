@@ -3,9 +3,9 @@
     "productId":  "dhs",
     "policyId":  "bruker.user-management.capability-matrix.v1",
     "decisionSource":  "../capability-matrix.v1.json",
-    "canonicalMatrixSha256":  "10467256531b910e08cbbcd7ea96b35350426c105b2778f326c70e242f3d539c",
+    "canonicalMatrixSha256":  "609c4f45523c193203b30d96c5f83d5335e88cf5e00f171b0d296a59a521a7aa",
     "failClosedSource":  "fail-closed-inputs.v1.json",
-    "failClosedSha256":  "81d8bd29a1d98fd97a4c2894f869cd05732af1ca9f21a0d15a6790ea8b0bf05a",
+    "failClosedSha256":  "b072ce31b891ee7af32e1eb4e438a10d45fe2bbe43e6cfcd353669e9ee196de7",
     "scenarioCount":  2340,
     "roles":  [
                   "operator",
@@ -68,6 +68,7 @@
                      ],
     "semanticFields":  [
                            "roleDecision",
+                           "targetScopePolicyId",
                            "effectiveDecision",
                            "guidanceCategory",
                            "retryDisposition",

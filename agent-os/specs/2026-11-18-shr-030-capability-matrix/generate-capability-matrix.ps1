@@ -34,8 +34,17 @@ function New-Operation {
         [string[]]$Capabilities,
         [ValidateSet('all', 'any')][string]$Mode = 'all',
         [string]$Boundary = 'authoritative-service-before-operation',
-        [string]$Evidence = 'FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19'
+        [string]$Evidence = 'FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19',
+        [System.Collections.IDictionary]$TargetScopeByRole = $null
     )
+
+    if ($null -eq $TargetScopeByRole) {
+        $TargetScopeByRole = [ordered]@{
+            operator = 'not-applicable'
+            supervisor = 'not-applicable'
+            administrator = 'not-applicable'
+        }
+    }
 
     $expression = if ($Mode -eq 'any') {
         'Any(' + ($Capabilities -join ',') + ')'
@@ -51,6 +60,7 @@ function New-Operation {
         capabilityExpression = $expression
         requiredCapabilities = @($Capabilities)
         expressionMode = $Mode
+        targetScopePolicyByRole = [pscustomobject]$TargetScopeByRole
         enforcementBoundary = $Boundary
         evidenceId = $Evidence
     }
@@ -75,7 +85,11 @@ function Test-OperationAllowed {
 function Get-DecisionProjection {
     param($Operation, [bool]$RoleAllowed, [string]$PolicyState)
 
-    $isReportOperation = $Operation.operationId -in @(
+    $isReportContentAccessOperation = $Operation.operationId -in @(
+        'report-surface-access',
+        'completed-report-view'
+    )
+    $isReportRelatedOperation = $Operation.operationId -in @(
         'report-surface-access',
         'equipment-report-generation',
         'event-report-generation',
@@ -91,7 +105,7 @@ function Get-DecisionProjection {
     if (-not $RoleAllowed -or $PolicyState -eq 'denied') {
         $projection = if ($Operation.operationId -eq 'report-surface-access') {
             'hidden-reject-deep-link'
-        } elseif ($isReportOperation -and -not $RoleAllowed) {
+        } elseif ($isReportContentAccessOperation -and -not $RoleAllowed) {
             'absent-with-protected-surface'
         } else {
             'visible-disabled'
@@ -101,7 +115,7 @@ function Get-DecisionProjection {
             guidanceCategory = 'authorization-denied'
             retryDisposition = 'do-not-retry'
             presentationProjection = $projection
-            protectedContentDisposition = if ($isReportOperation) { 'remove' } else { 'retain' }
+            protectedContentDisposition = if ($isReportContentAccessOperation) { 'remove' } else { 'retain' }
             focusDisposition = 'restore-stable-target'
             statusAnnouncement = 'announce-neutral-denial'
         }
@@ -125,7 +139,7 @@ function Get-DecisionProjection {
                 guidanceCategory = 'reauthenticate'
                 retryDisposition = 'reauthenticate'
                 presentationProjection = 'visible-disabled'
-                protectedContentDisposition = if ($isReportOperation) { 'remove' } else { 'retain' }
+                protectedContentDisposition = if ($isReportRelatedOperation) { 'remove' } else { 'retain' }
                 focusDisposition = 'restore-stable-target'
                 statusAnnouncement = 'announce-neutral-reauthentication'
             }
@@ -136,7 +150,7 @@ function Get-DecisionProjection {
                 guidanceCategory = 'retry-when-ready'
                 retryDisposition = 'retry'
                 presentationProjection = 'visible-disabled'
-                protectedContentDisposition = if ($isReportOperation) { 'remove' } else { 'retain' }
+                protectedContentDisposition = if ($isReportRelatedOperation) { 'remove' } else { 'retain' }
                 focusDisposition = 'restore-stable-target'
                 statusAnnouncement = 'announce-neutral-unavailable'
             }
@@ -222,6 +236,70 @@ $bundles = @(
     [pscustomobject][ordered]@{ id = 'lab-qa+service-maintenance'; capabilityIds = @('CanViewSubstanceLibrary','CanEditSubstanceLibrary','CanSelectDetectionAlgorithm','CanDoSubstanceTraining','CanAccessInstrumentConfiguration','CanAccessSamplingDataSystemStatus','CanDoMaintenance','CanCleanSystem','CanAutoCalibrate','CanManuallyCalibrate','CanUpgradeSoftware','CanViewSystemFolders'); evidenceId = 'CURRENT-RESOLVER-BASELINE-2026-11-19' }
 )
 
+$targetScopePolicies = @(
+    [pscustomobject][ordered]@{
+        id = 'not-applicable'; appliesTo = 'none'; allowedCurrentTargetRoles = @(); allowedRequestedTargetRoles = @()
+        mayChangeBaseRole = $false; mayChangeSpecialistCapabilities = $false
+        selfAccessMutation = 'not-applicable'; finalActiveAdministrator = 'not-applicable'
+    }
+    [pscustomobject][ordered]@{
+        id = 'deny'; appliesTo = 'managed-user'; allowedCurrentTargetRoles = @(); allowedRequestedTargetRoles = @()
+        mayChangeBaseRole = $false; mayChangeSpecialistCapabilities = $false
+        selfAccessMutation = 'deny'; finalActiveAdministrator = 'preserve'
+    }
+    [pscustomobject][ordered]@{
+        id = 'supervisor-operator-target-read'; appliesTo = 'current-target'; allowedCurrentTargetRoles = @('operator'); allowedRequestedTargetRoles = @()
+        mayChangeBaseRole = $false; mayChangeSpecialistCapabilities = $false
+        selfAccessMutation = 'deny'; finalActiveAdministrator = 'not-applicable'
+    }
+    [pscustomobject][ordered]@{
+        id = 'supervisor-create-operator-no-specialist'; appliesTo = 'requested-target'; allowedCurrentTargetRoles = @(); allowedRequestedTargetRoles = @('operator')
+        mayChangeBaseRole = $false; mayChangeSpecialistCapabilities = $false
+        selfAccessMutation = 'deny'; finalActiveAdministrator = 'not-applicable'
+    }
+    [pscustomobject][ordered]@{
+        id = 'supervisor-edit-operator-no-access-mutation'; appliesTo = 'current-and-requested-target'; allowedCurrentTargetRoles = @('operator'); allowedRequestedTargetRoles = @('operator')
+        mayChangeBaseRole = $false; mayChangeSpecialistCapabilities = $false
+        selfAccessMutation = 'deny'; finalActiveAdministrator = 'not-applicable'
+    }
+    [pscustomobject][ordered]@{
+        id = 'supervisor-operator-target-mutation'; appliesTo = 'current-target'; allowedCurrentTargetRoles = @('operator'); allowedRequestedTargetRoles = @()
+        mayChangeBaseRole = $false; mayChangeSpecialistCapabilities = $false
+        selfAccessMutation = 'deny'; finalActiveAdministrator = 'not-applicable'
+    }
+    [pscustomobject][ordered]@{
+        id = 'administrator-selectable-target-read'; appliesTo = 'current-target'; allowedCurrentTargetRoles = @('operator','supervisor','administrator'); allowedRequestedTargetRoles = @()
+        mayChangeBaseRole = $false; mayChangeSpecialistCapabilities = $false
+        selfAccessMutation = 'allow'; finalActiveAdministrator = 'not-applicable'
+    }
+    [pscustomobject][ordered]@{
+        id = 'administrator-create-selectable'; appliesTo = 'requested-target'; allowedCurrentTargetRoles = @(); allowedRequestedTargetRoles = @('operator','supervisor','administrator')
+        mayChangeBaseRole = $false; mayChangeSpecialistCapabilities = $true
+        selfAccessMutation = 'not-applicable'; finalActiveAdministrator = 'not-applicable'
+    }
+    [pscustomobject][ordered]@{
+        id = 'administrator-edit-selectable-with-safeguards'; appliesTo = 'current-and-requested-target'; allowedCurrentTargetRoles = @('operator','supervisor','administrator'); allowedRequestedTargetRoles = @('operator','supervisor','administrator')
+        mayChangeBaseRole = $true; mayChangeSpecialistCapabilities = $true
+        selfAccessMutation = 'deny'; finalActiveAdministrator = 'preserve'
+    }
+    [pscustomobject][ordered]@{
+        id = 'administrator-selectable-target-mutation'; appliesTo = 'current-target'; allowedCurrentTargetRoles = @('operator','supervisor','administrator'); allowedRequestedTargetRoles = @()
+        mayChangeBaseRole = $false; mayChangeSpecialistCapabilities = $false
+        selfAccessMutation = 'deny'; finalActiveAdministrator = 'preserve'
+    }
+    [pscustomobject][ordered]@{
+        id = 'administrator-role-change-with-safeguards'; appliesTo = 'current-and-requested-target'; allowedCurrentTargetRoles = @('operator','supervisor','administrator'); allowedRequestedTargetRoles = @('operator','supervisor','administrator')
+        mayChangeBaseRole = $true; mayChangeSpecialistCapabilities = $false
+        selfAccessMutation = 'deny'; finalActiveAdministrator = 'preserve'
+    }
+)
+
+$managedUserReadScopes = [ordered]@{ operator='deny'; supervisor='supervisor-operator-target-read'; administrator='administrator-selectable-target-read' }
+$managedUserCreateScopes = [ordered]@{ operator='deny'; supervisor='supervisor-create-operator-no-specialist'; administrator='administrator-create-selectable' }
+$managedUserEditScopes = [ordered]@{ operator='deny'; supervisor='supervisor-edit-operator-no-access-mutation'; administrator='administrator-edit-selectable-with-safeguards' }
+$managedUserMutationScopes = [ordered]@{ operator='deny'; supervisor='supervisor-operator-target-mutation'; administrator='administrator-selectable-target-mutation' }
+$managedUserRoleChangeScopes = [ordered]@{ operator='deny'; supervisor='deny'; administrator='administrator-role-change-with-safeguards' }
+
 $operations = @(
     New-Operation 1 'ReportSurfaceAccess' 'report-surface-access' 'Enter or view the report surface.' @('CanAccessReports') 'all' 'product-navigation-and-service-deep-link' 'OWNER-ATTESTATION-2026-11-18'
     New-Operation 2 'EquipmentReportGeneration' 'equipment-report-generation' 'Generate an Equipment report.' @('CanAccessReports') 'all' 'service-before-source-retrieval' 'OWNER-ATTESTATION-2026-11-18'
@@ -253,15 +331,15 @@ $operations = @(
     New-Operation 28 'SamplingDataExport' 'sampling-data-export' 'Export sampling data.' @('CanExportSamplingData')
     New-Operation 29 'SoftwareUpgrade' 'software-upgrade' 'Upgrade software.' @('CanUpgradeSoftware')
     New-Operation 30 'SystemFoldersView' 'system-folders-view' 'View approved system folders.' @('CanViewSystemFolders')
-    New-Operation 31 'UserPolicyInspection' 'user-policy-inspection' 'Inspect a managed user policy.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any'
-    New-Operation 32 'ManagedUserCreate' 'managed-user-create' 'Create a managed user.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any'
-    New-Operation 33 'ManagedUserEdit' 'managed-user-edit' 'Edit a managed user.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any'
-    New-Operation 34 'ManagedUserEnableOrDisable' 'managed-user-enable-or-disable' 'Enable or disable a managed user.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any'
-    New-Operation 35 'ManagedUserCredentialReset' 'managed-user-credential-reset' 'Reset managed-user credentials.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any'
-    New-Operation 36 'ManagedUserMfaReset' 'managed-user-mfa-reset' 'Reset managed-user MFA.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any'
-    New-Operation 37 'ManagedUserDelete' 'managed-user-delete' 'Delete a managed user.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any'
-    New-Operation 38 'ManagedUserRoleChange' 'managed-user-role-change' 'Change a managed user role.' @('CanEditUserRole')
-    New-Operation 39 'ManagedUserAccessTokenRevoke' 'managed-user-access-token-revoke' 'Revoke a managed user access token.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any'
+    New-Operation 31 'UserPolicyInspection' 'user-policy-inspection' 'Inspect a managed user policy.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any' 'authoritative-service-before-operation' 'FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19' $managedUserReadScopes
+    New-Operation 32 'ManagedUserCreate' 'managed-user-create' 'Create a managed user.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any' 'authoritative-service-before-operation' 'FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19' $managedUserCreateScopes
+    New-Operation 33 'ManagedUserEdit' 'managed-user-edit' 'Edit a managed user.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any' 'authoritative-service-before-operation' 'FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19' $managedUserEditScopes
+    New-Operation 34 'ManagedUserEnableOrDisable' 'managed-user-enable-or-disable' 'Enable or disable a managed user.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any' 'authoritative-service-before-operation' 'FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19' $managedUserMutationScopes
+    New-Operation 35 'ManagedUserCredentialReset' 'managed-user-credential-reset' 'Reset managed-user credentials.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any' 'authoritative-service-before-operation' 'FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19' $managedUserMutationScopes
+    New-Operation 36 'ManagedUserMfaReset' 'managed-user-mfa-reset' 'Reset managed-user MFA.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any' 'authoritative-service-before-operation' 'FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19' $managedUserMutationScopes
+    New-Operation 37 'ManagedUserDelete' 'managed-user-delete' 'Delete a managed user.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any' 'authoritative-service-before-operation' 'FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19' $managedUserMutationScopes
+    New-Operation 38 'ManagedUserRoleChange' 'managed-user-role-change' 'Change a managed user role.' @('CanEditUserRole') 'all' 'authoritative-service-before-operation' 'FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19' $managedUserRoleChangeScopes
+    New-Operation 39 'ManagedUserAccessTokenRevoke' 'managed-user-access-token-revoke' 'Revoke a managed user access token.' @('CanManageAdministrators','CanManageScreeningStaff','CanManageServiceTechs') 'any' 'authoritative-service-before-operation' 'FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19' $managedUserMutationScopes
 )
 
 $policyStates = @('allowed','denied','reauthentication-required','policy-unavailable','prerequisite-unmet')
@@ -286,7 +364,12 @@ foreach ($role in $roles) {
         foreach ($capability in $bundle.capabilityIds) { [void]$effectiveCapabilities.Add($capability) }
 
         foreach ($operation in $operations) {
-            $roleAllowed = Test-OperationAllowed $operation $effectiveCapabilities
+            $targetScopePolicyId = $operation.targetScopePolicyByRole.PSObject.Properties[$role.id].Value
+            $targetScopePolicy = $targetScopePolicies | Where-Object { $_.id -eq $targetScopePolicyId }
+            if ($null -eq $targetScopePolicy) {
+                throw "Operation '$($operation.operationId)' references unknown target-scope policy '$targetScopePolicyId' for '$($role.id)'."
+            }
+            $roleAllowed = (Test-OperationAllowed $operation $effectiveCapabilities) -and $targetScopePolicyId -ne 'deny'
             $decisionEvidence = @($role.evidenceId, $bundle.evidenceId, $operation.evidenceId) |
                 Select-Object -Unique
             foreach ($policyState in $policyStates) {
@@ -296,6 +379,7 @@ foreach ($role in $roles) {
                     operationId = $operation.operationId
                     auditOperationOrdinal = $operation.auditOrdinal
                     capabilityExpression = $operation.capabilityExpression
+                    targetScopePolicyId = $targetScopePolicyId
                     baseRole = $role.id
                     bundleSet = $bundle.id
                     roleDecision = if ($roleAllowed) { 'allowed' } else { 'denied' }
@@ -323,6 +407,7 @@ $catalog = [pscustomobject][ordered]@{
     capabilities = $capabilities
     roles = $roles
     bundles = $bundles
+    targetScopePolicies = $targetScopePolicies
     operations = $operations
     policyStates = $policyStates
     unknownCodeFallback = [pscustomobject][ordered]@{
@@ -373,6 +458,22 @@ $failClosedFixtures = [pscustomobject][ordered]@{
         [pscustomobject][ordered]@{ id='unknown-operation-code'; baseRoles=@('administrator'); bundles=@(); input='future-operation'; expected='deny' }
         [pscustomobject][ordered]@{ id='unknown-policy-state'; baseRoles=@('administrator'); bundles=@(); input='future-policy-state'; expected='deny' }
         [pscustomobject][ordered]@{ id='unknown-guidance-code'; baseRoles=@('administrator'); bundles=@(); input='future-guidance'; expected='deny' }
+        [pscustomobject][ordered]@{ id='unknown-target-scope-policy'; baseRoles=@('administrator'); bundles=@(); input='future-target-scope'; expected='deny' }
+    )
+    presentationCases = @(
+        [pscustomobject][ordered]@{ id='report-surface-denied-removes-content'; baseRole='operator'; operationId='report-surface-access'; policyState='allowed'; expectedProjection='hidden-reject-deep-link'; expectedContentDisposition='remove' }
+        [pscustomobject][ordered]@{ id='completed-report-view-denied-removes-content'; baseRole='operator'; operationId='completed-report-view'; policyState='allowed'; expectedProjection='absent-with-protected-surface'; expectedContentDisposition='remove' }
+        [pscustomobject][ordered]@{ id='export-denied-retains-authorized-report'; baseRole='operator'; operationId='report-export'; policyState='allowed'; expectedProjection='visible-disabled'; expectedContentDisposition='retain' }
+        [pscustomobject][ordered]@{ id='print-denied-retains-authorized-report'; baseRole='operator'; operationId='report-print'; policyState='allowed'; expectedProjection='visible-disabled'; expectedContentDisposition='retain' }
+        [pscustomobject][ordered]@{ id='print-settings-denied-retains-authorized-report'; baseRole='operator'; operationId='print-settings-change'; policyState='allowed'; expectedProjection='visible-disabled'; expectedContentDisposition='retain' }
+        [pscustomobject][ordered]@{ id='auto-print-settings-denied-retains-authorized-report'; baseRole='operator'; operationId='auto-print-settings-change'; policyState='allowed'; expectedProjection='visible-disabled'; expectedContentDisposition='retain' }
+        [pscustomobject][ordered]@{ id='ssi-edit-denied-retains-authorized-report'; baseRole='supervisor'; operationId='ssi-statement-edit'; policyState='allowed'; expectedProjection='visible-disabled'; expectedContentDisposition='retain' }
+    )
+    targetScopeCases = @(
+        [pscustomobject][ordered]@{ id='supervisor-create-operator-only'; baseRole='supervisor'; operationId='managed-user-create'; expectedRoleDecision='allowed'; expectedTargetScopePolicyId='supervisor-create-operator-no-specialist' }
+        [pscustomobject][ordered]@{ id='supervisor-edit-operator-without-access-mutation'; baseRole='supervisor'; operationId='managed-user-edit'; expectedRoleDecision='allowed'; expectedTargetScopePolicyId='supervisor-edit-operator-no-access-mutation' }
+        [pscustomobject][ordered]@{ id='supervisor-role-change-denied'; baseRole='supervisor'; operationId='managed-user-role-change'; expectedRoleDecision='denied'; expectedTargetScopePolicyId='deny' }
+        [pscustomobject][ordered]@{ id='administrator-role-change-safeguarded'; baseRole='administrator'; operationId='managed-user-role-change'; expectedRoleDecision='allowed'; expectedTargetScopePolicyId='administrator-role-change-with-safeguards' }
     )
 }
 
@@ -426,7 +527,7 @@ foreach ($productId in @('dhs','triple-quad-ui')) {
         bundleSets = @($bundles.id)
         operations = @($operations.operationId)
         policyStates = @($policyStates)
-        semanticFields = @('roleDecision','effectiveDecision','guidanceCategory','retryDisposition','presentationProjection','protectedContentDisposition','focusDisposition','statusAnnouncement')
+        semanticFields = @('roleDecision','targetScopePolicyId','effectiveDecision','guidanceCategory','retryDisposition','presentationProjection','protectedContentDisposition','focusDisposition','statusAnnouncement')
         unknownCodeFallback = $catalog.unknownCodeFallback
     }
     Write-Utf8 (Join-Path $fixtureDirectory "$productId-capability-decisions.v1.json") ($parity | ConvertTo-Json -Depth 10)

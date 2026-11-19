@@ -399,6 +399,176 @@
                         "evidenceId":  "CURRENT-RESOLVER-BASELINE-2026-11-19"
                     }
                 ],
+    "targetScopePolicies":  [
+                                {
+                                    "id":  "not-applicable",
+                                    "appliesTo":  "none",
+                                    "allowedCurrentTargetRoles":  [
+
+                                                                  ],
+                                    "allowedRequestedTargetRoles":  [
+
+                                                                    ],
+                                    "mayChangeBaseRole":  false,
+                                    "mayChangeSpecialistCapabilities":  false,
+                                    "selfAccessMutation":  "not-applicable",
+                                    "finalActiveAdministrator":  "not-applicable"
+                                },
+                                {
+                                    "id":  "deny",
+                                    "appliesTo":  "managed-user",
+                                    "allowedCurrentTargetRoles":  [
+
+                                                                  ],
+                                    "allowedRequestedTargetRoles":  [
+
+                                                                    ],
+                                    "mayChangeBaseRole":  false,
+                                    "mayChangeSpecialistCapabilities":  false,
+                                    "selfAccessMutation":  "deny",
+                                    "finalActiveAdministrator":  "preserve"
+                                },
+                                {
+                                    "id":  "supervisor-operator-target-read",
+                                    "appliesTo":  "current-target",
+                                    "allowedCurrentTargetRoles":  [
+                                                                      "operator"
+                                                                  ],
+                                    "allowedRequestedTargetRoles":  [
+
+                                                                    ],
+                                    "mayChangeBaseRole":  false,
+                                    "mayChangeSpecialistCapabilities":  false,
+                                    "selfAccessMutation":  "deny",
+                                    "finalActiveAdministrator":  "not-applicable"
+                                },
+                                {
+                                    "id":  "supervisor-create-operator-no-specialist",
+                                    "appliesTo":  "requested-target",
+                                    "allowedCurrentTargetRoles":  [
+
+                                                                  ],
+                                    "allowedRequestedTargetRoles":  [
+                                                                        "operator"
+                                                                    ],
+                                    "mayChangeBaseRole":  false,
+                                    "mayChangeSpecialistCapabilities":  false,
+                                    "selfAccessMutation":  "deny",
+                                    "finalActiveAdministrator":  "not-applicable"
+                                },
+                                {
+                                    "id":  "supervisor-edit-operator-no-access-mutation",
+                                    "appliesTo":  "current-and-requested-target",
+                                    "allowedCurrentTargetRoles":  [
+                                                                      "operator"
+                                                                  ],
+                                    "allowedRequestedTargetRoles":  [
+                                                                        "operator"
+                                                                    ],
+                                    "mayChangeBaseRole":  false,
+                                    "mayChangeSpecialistCapabilities":  false,
+                                    "selfAccessMutation":  "deny",
+                                    "finalActiveAdministrator":  "not-applicable"
+                                },
+                                {
+                                    "id":  "supervisor-operator-target-mutation",
+                                    "appliesTo":  "current-target",
+                                    "allowedCurrentTargetRoles":  [
+                                                                      "operator"
+                                                                  ],
+                                    "allowedRequestedTargetRoles":  [
+
+                                                                    ],
+                                    "mayChangeBaseRole":  false,
+                                    "mayChangeSpecialistCapabilities":  false,
+                                    "selfAccessMutation":  "deny",
+                                    "finalActiveAdministrator":  "not-applicable"
+                                },
+                                {
+                                    "id":  "administrator-selectable-target-read",
+                                    "appliesTo":  "current-target",
+                                    "allowedCurrentTargetRoles":  [
+                                                                      "operator",
+                                                                      "supervisor",
+                                                                      "administrator"
+                                                                  ],
+                                    "allowedRequestedTargetRoles":  [
+
+                                                                    ],
+                                    "mayChangeBaseRole":  false,
+                                    "mayChangeSpecialistCapabilities":  false,
+                                    "selfAccessMutation":  "allow",
+                                    "finalActiveAdministrator":  "not-applicable"
+                                },
+                                {
+                                    "id":  "administrator-create-selectable",
+                                    "appliesTo":  "requested-target",
+                                    "allowedCurrentTargetRoles":  [
+
+                                                                  ],
+                                    "allowedRequestedTargetRoles":  [
+                                                                        "operator",
+                                                                        "supervisor",
+                                                                        "administrator"
+                                                                    ],
+                                    "mayChangeBaseRole":  false,
+                                    "mayChangeSpecialistCapabilities":  true,
+                                    "selfAccessMutation":  "not-applicable",
+                                    "finalActiveAdministrator":  "not-applicable"
+                                },
+                                {
+                                    "id":  "administrator-edit-selectable-with-safeguards",
+                                    "appliesTo":  "current-and-requested-target",
+                                    "allowedCurrentTargetRoles":  [
+                                                                      "operator",
+                                                                      "supervisor",
+                                                                      "administrator"
+                                                                  ],
+                                    "allowedRequestedTargetRoles":  [
+                                                                        "operator",
+                                                                        "supervisor",
+                                                                        "administrator"
+                                                                    ],
+                                    "mayChangeBaseRole":  true,
+                                    "mayChangeSpecialistCapabilities":  true,
+                                    "selfAccessMutation":  "deny",
+                                    "finalActiveAdministrator":  "preserve"
+                                },
+                                {
+                                    "id":  "administrator-selectable-target-mutation",
+                                    "appliesTo":  "current-target",
+                                    "allowedCurrentTargetRoles":  [
+                                                                      "operator",
+                                                                      "supervisor",
+                                                                      "administrator"
+                                                                  ],
+                                    "allowedRequestedTargetRoles":  [
+
+                                                                    ],
+                                    "mayChangeBaseRole":  false,
+                                    "mayChangeSpecialistCapabilities":  false,
+                                    "selfAccessMutation":  "deny",
+                                    "finalActiveAdministrator":  "preserve"
+                                },
+                                {
+                                    "id":  "administrator-role-change-with-safeguards",
+                                    "appliesTo":  "current-and-requested-target",
+                                    "allowedCurrentTargetRoles":  [
+                                                                      "operator",
+                                                                      "supervisor",
+                                                                      "administrator"
+                                                                  ],
+                                    "allowedRequestedTargetRoles":  [
+                                                                        "operator",
+                                                                        "supervisor",
+                                                                        "administrator"
+                                                                    ],
+                                    "mayChangeBaseRole":  true,
+                                    "mayChangeSpecialistCapabilities":  false,
+                                    "selfAccessMutation":  "deny",
+                                    "finalActiveAdministrator":  "preserve"
+                                }
+                            ],
     "operations":  [
                        {
                            "auditOrdinal":  1,
@@ -410,6 +580,11 @@
                                                         "CanAccessReports"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "product-navigation-and-service-deep-link",
                            "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
                        },
@@ -423,6 +598,11 @@
                                                         "CanAccessReports"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "service-before-source-retrieval",
                            "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
                        },
@@ -436,6 +616,11 @@
                                                         "CanAccessReports"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "service-before-source-retrieval",
                            "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
                        },
@@ -449,6 +634,11 @@
                                                         "CanAccessReports"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "service-before-source-retrieval",
                            "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
                        },
@@ -462,6 +652,11 @@
                                                         "CanAccessReports"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "product-before-content-disclosure",
                            "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
                        },
@@ -475,6 +670,11 @@
                                                         "CanExportReports"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "product-before-atomic-replacement",
                            "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
                        },
@@ -488,6 +688,11 @@
                                                         "CanPrintReports"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "product-before-spool-submission",
                            "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
                        },
@@ -501,6 +706,11 @@
                                                         "CanEnableDisablePrinting"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -514,6 +724,11 @@
                                                         "CanEnableDisablePrinting"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -527,6 +742,11 @@
                                                         "CanEditSecurityFooter"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-setting-mutation",
                            "evidenceId":  "OWNER-ATTESTATION-2026-11-18"
                        },
@@ -540,6 +760,11 @@
                                                         "CanShutdownReboot"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -553,6 +778,11 @@
                                                         "CanLogonLogoff"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -566,6 +796,11 @@
                                                         "CanAnalyzeSamples"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -579,6 +814,11 @@
                                                         "CanAccessAlarms"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -592,6 +832,11 @@
                                                         "CanEditAudibleAlarms"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -605,6 +850,11 @@
                                                         "CanViewSubstanceLibrary"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -618,6 +868,11 @@
                                                         "CanEditSubstanceLibrary"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -631,6 +886,11 @@
                                                         "CanSelectDetectionAlgorithm"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -644,6 +904,11 @@
                                                         "CanDoSubstanceTraining"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -657,6 +922,11 @@
                                                         "CanAccessInstrumentConfiguration"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -670,6 +940,11 @@
                                                         "CanAccessSamplingDataSystemStatus"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -683,6 +958,11 @@
                                                         "CanDoMaintenance"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -696,6 +976,11 @@
                                                         "CanCleanSystem"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -709,6 +994,11 @@
                                                         "CanAutoCalibrate"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -722,6 +1012,11 @@
                                                         "CanManuallyCalibrate"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -735,6 +1030,11 @@
                                                         "CanManageData"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -748,6 +1048,11 @@
                                                         "CanCopyDataToUsb"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -761,6 +1066,11 @@
                                                         "CanExportSamplingData"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -774,6 +1084,11 @@
                                                         "CanUpgradeSoftware"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -787,6 +1102,11 @@
                                                         "CanViewSystemFolders"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "not-applicable",
+                                                           "supervisor":  "not-applicable",
+                                                           "administrator":  "not-applicable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -802,6 +1122,11 @@
                                                         "CanManageServiceTechs"
                                                     ],
                            "expressionMode":  "any",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "deny",
+                                                           "supervisor":  "supervisor-operator-target-read",
+                                                           "administrator":  "administrator-selectable-target-read"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -817,6 +1142,11 @@
                                                         "CanManageServiceTechs"
                                                     ],
                            "expressionMode":  "any",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "deny",
+                                                           "supervisor":  "supervisor-create-operator-no-specialist",
+                                                           "administrator":  "administrator-create-selectable"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -832,6 +1162,11 @@
                                                         "CanManageServiceTechs"
                                                     ],
                            "expressionMode":  "any",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "deny",
+                                                           "supervisor":  "supervisor-edit-operator-no-access-mutation",
+                                                           "administrator":  "administrator-edit-selectable-with-safeguards"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -847,6 +1182,11 @@
                                                         "CanManageServiceTechs"
                                                     ],
                            "expressionMode":  "any",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "deny",
+                                                           "supervisor":  "supervisor-operator-target-mutation",
+                                                           "administrator":  "administrator-selectable-target-mutation"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -862,6 +1202,11 @@
                                                         "CanManageServiceTechs"
                                                     ],
                            "expressionMode":  "any",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "deny",
+                                                           "supervisor":  "supervisor-operator-target-mutation",
+                                                           "administrator":  "administrator-selectable-target-mutation"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -877,6 +1222,11 @@
                                                         "CanManageServiceTechs"
                                                     ],
                            "expressionMode":  "any",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "deny",
+                                                           "supervisor":  "supervisor-operator-target-mutation",
+                                                           "administrator":  "administrator-selectable-target-mutation"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -892,6 +1242,11 @@
                                                         "CanManageServiceTechs"
                                                     ],
                            "expressionMode":  "any",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "deny",
+                                                           "supervisor":  "supervisor-operator-target-mutation",
+                                                           "administrator":  "administrator-selectable-target-mutation"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -905,6 +1260,11 @@
                                                         "CanEditUserRole"
                                                     ],
                            "expressionMode":  "all",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "deny",
+                                                           "supervisor":  "deny",
+                                                           "administrator":  "administrator-role-change-with-safeguards"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        },
@@ -920,6 +1280,11 @@
                                                         "CanManageServiceTechs"
                                                     ],
                            "expressionMode":  "any",
+                           "targetScopePolicyByRole":  {
+                                                           "operator":  "deny",
+                                                           "supervisor":  "supervisor-operator-target-mutation",
+                                                           "administrator":  "administrator-selectable-target-mutation"
+                                                       },
                            "enforcementBoundary":  "authoritative-service-before-operation",
                            "evidenceId":  "FRD-133-APPENDIX-C+CURRENT-RESOLVER-BASELINE-2026-11-19"
                        }

@@ -2,7 +2,7 @@
 
 ## State
 
-**Review-ready as of 2026-11-19.**
+**Remediation review-ready as of 2026-11-19.**
 
 - Owned path: `agent-os/specs/2026-11-18-shr-030-capability-matrix/`
 - Execution is confined to this policy/evidence artifact directory in the existing agent-system checkout.
@@ -80,11 +80,13 @@ QA and Service bundles never grant report access, export, or print independently
     - loading/unavailable/reauthentication: protected actions remain disabled and expose neutral typed guidance;
     - non-security prerequisites such as no completed report or no configured printer are distinct from authorization denial;
     - revocation/logout/policy loss disables actions immediately, announces the state, restores focus to a stable target, and applies the approved protected-content rule.
+    - operation-specific denial of generation, export, print, print settings, auto-print settings, or SSI editing retains an otherwise authorized displayed report; only report-surface/completed-content access loss or session/policy loss removes protected report content.
 12. Hidden elements are absent from keyboard and automation traversal. Disabled elements have persistent, screen-reader-discoverable localized explanation outside the disabled control itself.
 13. Machine-readable CSV and canonical JSON contain operation ID, capability expression, role/bundle decision, typed policy state, guidance category, retry disposition, and presentation projection; both validate identically.
 14. DHS and TripleQuadUI fixtures produce identical semantic decisions for every base role, bundle combination, operation, policy state, and unknown future code.
 15. Existing `UserRights` numeric values and proto field numbers remain unchanged. Additive capabilities are append-only, versioned, migration-safe, and fail closed in old consumers.
 16. Audit operation IDs and denial/guidance categories align with published SHR-014A before SHR-032 integration.
+17. Managed-user decisions bind capability checks to a machine-readable target-scope policy. Supervisor scope is limited to Operator targets, Operator creation without specialist bundles, and Operator edits that preserve the Operator role and specialist-bundle state. Supervisor role changes are denied. Administrator scope covers the three selectable roles while preserving self-access and final-active-Administrator safeguards.
 
 ## Owner-approved v1 matrix attestation — 2026-11-18
 
@@ -114,6 +116,8 @@ Validate schema, canonical CSV/JSON equivalence, exhaustive matrix/alias/bundle/
 
 - Published SHR-014A alignment: all 39 operation names and ordinals match Common.Reports `743a65b40d9351bfd296ad477c9bd51f184948fb`.
 - Matrix coverage: 3 roles x 4 bundle sets x 39 operations x 5 policy states = 2,340 unique decisions.
+- Each decision resolves one of 11 structured target-scope policies without adding a target dimension. The schema therefore remains 2,340 exhaustive decisions while requiring 18 semantic fields per row.
+- Seven explicit presentation fixtures prove that action/settings denial retains an authorized report while report-surface/completed-view denial removes content. Four target-scope fixtures prove Supervisor Operator-only management, prohibited Supervisor role changes, and Administrator safeguards.
 - Canonical CSV and JSON regenerate byte-for-byte from the checked-in generator and validate identically.
 - DHS and TripleQuadUI parity manifests bind the same matrix and fail-closed fixture hashes.
 - Existing UserRights bit positions and AccessPolicy proto fields remain read-only and unchanged; planned report export/print additions are append-only bits/fields 31 and 32.
