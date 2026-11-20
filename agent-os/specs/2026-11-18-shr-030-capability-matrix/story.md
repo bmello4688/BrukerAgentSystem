@@ -2,7 +2,7 @@
 
 ## State
 
-**Published and independently accepted as of 2026-11-20. Security confirmation pending.**
+**Published, independently accepted, and Security-approved as of 2026-11-20. SHR-032 is development-ready.**
 
 - Owned path: `agent-os/specs/2026-11-18-shr-030-capability-matrix/`
 - Execution is confined to this policy/evidence artifact directory in the existing agent-system checkout.

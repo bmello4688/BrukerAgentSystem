@@ -37,11 +37,11 @@ Security should explicitly approve or reject each item:
 
 Record the confirmation without adding sensitive SSI text:
 
-- Security reviewer/authority:
-- Review date and time zone:
-- Verdict: `GO` / `NO-GO`
-- Approved artifact commit and hashes:
-- Controlled SSI revision confirmed: `yes` / `no`
-- Conditions or rejected items:
+- Security reviewer/authority: Project owner acting as authorized Security approver
+- Review date and time zone: 2026-11-20 08:52 EST
+- Verdict: `GO`
+- Approved artifact commit and hashes: `ff84aed2b0f5eb238c2d12ab1444b5f264a66344` and the four SHA-256 values listed above
+- Controlled SSI revision confirmed: `yes`, through an approved internal channel; statement text intentionally omitted
+- Conditions or rejected items: none
 
 `GO` makes SHR-032 development-ready. `NO-GO` keeps production report authorization disabled and must identify the exact matrix item or artifact requiring revision.
