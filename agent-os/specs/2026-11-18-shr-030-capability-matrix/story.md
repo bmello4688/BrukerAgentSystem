@@ -2,7 +2,7 @@
 
 ## State
 
-**Remediation review-ready as of 2026-11-19.**
+**Published and independently accepted as of 2026-11-20. Security confirmation pending.**
 
 - Owned path: `agent-os/specs/2026-11-18-shr-030-capability-matrix/`
 - Execution is confined to this policy/evidence artifact directory in the existing agent-system checkout.
@@ -11,7 +11,7 @@ Feature Engineering produced the deterministic v1 catalog, exhaustive canonical 
 JSON schema, fail-closed fixtures, cross-product parity manifests, documentation, generator, and
 validator. No User Management, product, Common.Reports, UI, route, or gitlink source changed.
 
-SHR-030 publishes policy evidence and machine-readable fixtures; it changes no User Management or product source. Owner attestation for the v1 matrix is recorded below. Security confirmation remains a production-release gate. SHR-032 remains blocked until SHR-030 is reviewed and published.
+SHR-030 publishes policy evidence and machine-readable fixtures; it changes no User Management or product source. Owner attestation for the v1 matrix is recorded below. The accepted artifacts are published through agent-system commit `ff84aed2b0f5eb238c2d12ab1444b5f264a66344`. Security confirmation remains a production-release gate, and SHR-032 remains blocked until that confirmation is recorded against the exact artifact hashes in `security-confirmation-request.md`.
 
 ## Priority and size
 
