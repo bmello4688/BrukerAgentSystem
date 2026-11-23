@@ -122,8 +122,7 @@ This runbook is legal only while the activation document has never existed.
 3. Preserve migration manifests, evidence hashes, and the shared store. Do not delete accounts or
    rewrite the legacy store.
 4. Through an authenticated administrative workflow, disable all newly staged mapped shared
-   accounts. Keep bootstrap disabled unless the separately reviewed legacy rollback procedure needs
-   it for a later migration attempt; any re-enable requires a governed receipt. Do not expose
+   accounts. Keep bootstrap disabled permanently in this rolled-back store. Do not expose
    credentials or tokens.
 5. Restore the previously reviewed DHS package and its legacy host launchability from the local
    controlled rollback artifact.
@@ -131,7 +130,10 @@ This runbook is legal only while the activation document has never existed.
    blocks rollback and requires support.
 7. Start prior DHS, validate its prior login/reporting behavior, and keep the shared staged accounts
    disabled.
-8. Record rollback completion. A later attempt starts again at Runbook A with new manifest hashes.
+8. Record rollback completion. A later attempt must use a newly initialized shared store with one new
+   seeded bootstrap account; it never reuses or re-enables any account or ID from the rolled-back
+   store. Preserve the rolled-back store as read-only evidence and restart at Runbook A with new
+   hashes and mappings.
 
 ## Runbook F: post-activation incident/recovery
 

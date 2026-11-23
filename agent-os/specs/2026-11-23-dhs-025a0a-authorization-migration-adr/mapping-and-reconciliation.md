@@ -54,6 +54,9 @@ The seeded bootstrap account is migration infrastructure, not a retained legacy 
 6. Legacy `IsDisabled` is copied exactly. A legacy active lockout is archived and reset by shared
    policy; it never changes `IsDisabled`. Therefore a legacy enabled-but-locked account is staged
    enabled with mandatory credential reset, while a legacy disabled account remains disabled.
+7. A pre-activation rollback permanently disables the bootstrap and all mapped accounts in that
+   staged store. A later attempt uses a newly initialized shared store and new bootstrap; it never
+   reuses a staged ID, account, credential, or mapping from the rolled-back store.
 
 ## Role, bundle, and reporting-right mapping
 
