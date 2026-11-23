@@ -15,6 +15,7 @@ The lack of a sanctioned production distribution is not hidden as an estimate. C
 | Published DataService FDRS default capacity is 50,000 aggregates per repository instance, while D1 permits at most 10,000 returned rows and 20,000 work units per snapshot. | A legal storage population can exceed one report snapshot. The provider must return `LimitExceeded`; it must not truncate. |
 | D1 page size is 1-500, active snapshots are 4, lease is absolute 5 minutes, and provider work per call is 30 seconds. | Product code must page through one lease, never fan out unbounded parallel snapshots. |
 | At `T0`, the activated target partition must contain exactly zero preactivation Event aggregates and zero import/import-receipt state. | This is the only accepted initial population for `ForwardOnlyAtCutover`; any nonzero count is `MigrationIncomplete`. |
+| Published FDRS has append receipts but no activation binding or product-operation journal. | SHR-011D3 adds bounded pending-operation reads (1-500) and immutable activation generations; TQ-011B cannot use files/memory as durable retry state. |
 
 ## Bound fit
 
@@ -28,8 +29,9 @@ The lack of a sanctioned production distribution is not hidden as an estimate. C
 | snapshot rows | 10,000 | One Event/restart/session is one row. Exceeding it is zero-value `LimitExceeded`. |
 | snapshot work | 20,000 | Count every inspected candidate and nested annotation/alarm/pair/join per D1. No local re-count or partial result. |
 | provider call | 30 seconds monotonic | Timeout is zero-value `SourceUnavailable`; cursor does not advance. |
-| lease | 5 minutes absolute | Expiry requires a new query; no sliding renewal. |
+| lease | 5 minutes absolute | Expiry is exactly `SourceUnavailable/RestartQuery`; no sliding renewal. |
 | concurrent snapshots | 4 provider-wide, nonqueued | Fifth admission is `SourceUnavailable`/retry. |
+| activation generations | 1,024 complete rows | SHR-011D3 history read never truncates; 1,025 is provider/source `LimitExceeded`/`ContactSupport`. |
 
 Minimum work is at least the top-level candidate count. Alarm reasons, annotations, restart pairing, and session/Event joins add work. Therefore a request with fewer than 10,000 rows can still legally exceed 20,000 work; this is expected fail-closed behavior, not a reason to omit nested facts.
 
@@ -45,7 +47,8 @@ Tolerance is exactly zero for report-visible native FDRS facts:
 - zero incomplete/duplicate restart pairs represented as values;
 - zero unknown/unapproved result/alarm/lifecycle codes represented as values;
 - zero unresolved ambiguous write receipts when readiness is enabled;
-- zero cross-machine records or current machine/zone/config mismatch.
+- zero pending SHR-011D3 operation rows when readiness is enabled;
+- zero cross-machine records or machine/zone/source/config mismatch against the activation interval containing each occurrence.
 
 Retention must not silently turn a requested range into a successful partial page. If D2 cannot prove the requested complete snapshot because required source records were retained/evicted, map its integrity/unavailability result to `SourceGap`/`HistoryUnavailable` according to the published reason; never synthesize zero counts.
 
@@ -59,11 +62,12 @@ TQ-011B may emit only aggregate counters with no labels derived from identities,
 - reconciliation duplicate/gap/orphan/unknown/mismatch counts;
 - query row/work/page count buckets and limit outcome count;
 - active lease count and lease-expiry count.
+- activation-generation/reactivation success/failure counts and pending-operation count; never activation IDs, owner IDs, or configuration revisions.
 
 No raw distribution was available to this planning work. Before enabling a production site, the release owner reviews only these sanitized aggregate results from simulator/site qualification. Readiness requires all integrity counters to be zero; volume counters may be nonzero within published bounds.
 
 ## Verification datasets for TQ-011B
 
-Use synthetic controlled identifiers and annotations only. Tests must cover: empty; 1; page boundary 500/501; row 9,999/10,000/10,001; work 19,999/20,000/20,001; four/five leases; exact 5-minute expiry; 30-second timeout; date 3,660/3,661; annotation 512/513 FDRS scalars; identifier 128/129; cursor 512/513 bytes; duplicate ID; skipped ID; duplicate terminal; orphan session; incomplete restart; unknown code; machine/zone mismatch; cancellation at each publication boundary.
+Use synthetic controlled identifiers and annotations only. Tests must cover: empty; 1; page boundary 500/501; row 9,999/10,000/10,001; work 19,999/20,000/20,001; four/five leases; exact 5-minute expiry with `RestartQuery`; 30-second timeout; date 3,660/3,661; annotation 512/513 FDRS scalars; identifier 128/129; cursor 512/513 bytes; duplicate ID; skipped ID; duplicate terminal; orphan session; incomplete restart; unknown code; machine/zone mismatch; activation interval/config change; activation generation 1,024/1,025; pending operation 500/501; cancellation at each intent/repository/receipt/publication boundary.
 
 The expected result is complete `Ready` only at or within each accepted bound. Every exceeding/integrity case is the specified zero-value outcome.

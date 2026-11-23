@@ -13,13 +13,14 @@
 | Contract field | Authoritative source | Validation/disposition |
 |---|---|---|
 | contract version/query kind | constructor-bound D1 request type | Wrong/unknown version is zero-value `UnknownMapping`; no provider call. |
-| machine | activated `tq-machine-v1` binding derived from reconciled hardware serial | Caller machine must equal binding. Invalid is `IdentityInvalid`; different is `MachineMismatch`. |
+| machine | active SHR-011D3 `tq-machine-v1` binding derived from a post-health, event-applied connected hardware snapshot | Caller machine must equal binding. No qualifying observation is `SourceUnavailable`; invalid connected serial is `IdentityInvalid`; different is `MachineMismatch`. |
 | inclusive start/end date | server-validated request | Convert to half-open UTC using the activated zone/rule fingerprint. Span and conversion must satisfy D1 limits. |
-| reporting-zone ID | deployment option `ReportsV1:ReportingZoneId` bound at `T0` | Caller cannot override it. Unknown/changed rules are `ZoneInvalid`. |
+| reporting-zone ID | deployment option `ReportsV1:ReportingZoneId` bound in each activation interval | Caller cannot override it. Unknown/changed rules are `ZoneInvalid` until an approved successor activation. |
 | Equipment division | D1 request enum Day/Week/Month/Year | Unknown is `UnknownMapping`; it affects downstream grouping, not source ordering. |
 | Event ID | positive FDRS `SampleEventId` | Legacy sample number/repository ID never maps. Missing exact ID is D1 `NotFound`, mapped locally to zero-value `HistoryUnavailable`. |
 | page size/cursor | D1 page request, D2 integrity-protected cursor | Enforce 1-500 and 512 UTF-8 bytes; no cursor inspection in product code. |
 | completed/request time | injected `TimeProvider.GetUtcNow()` | Must be UTC and pass clock/readiness checks. |
+| activation interval | SHR-011D3 immutable generation whose `[T0, successor T0)` contains the occurrence | Missing/overlapping generation or a record whose machine/zone/source/query/config fields do not match its interval is `SourceGap`. |
 
 ## Canonical Event fields
 
@@ -29,18 +30,19 @@ The same Event projection is used by Equipment, Event, and User queries.
 |---|---|---|
 | `MachineId` | activated producer binding captured in `StartSampleCommand.MachineId` | Exact partition/envelope match; inconsistency is zero-value `MachineMismatch`/`SourceGap`. |
 | `SampleEventId` | `IFdrsRepository.StartSampleAsync` atomic high-water allocation | Positive, never reset/wrapped/reused. Duplicate/collision is `IdentityCollision`; discontinuity is `SourceGap`. |
-| `EventCorrelationId` (ordering/integrity source identity) | new GUID once at device-detected acceptance, retried unchanged through `AcceptSampleAsync`/completion | Conflicting correlation for one Event is `IdentityCollision`; never exposed as operator guidance. |
+| `EventCorrelationId` (ordering/integrity source identity) | RFC-4122 UUIDv5 over activation ID, `sample-start`, and the acceptance-attempt UUID already committed in SHR-011D3 | Exact deterministic retry only. Conflicting correlation for one Event is `IdentityCollision`; never exposed as operator guidance. |
 | `StartUtc` (source integrity, not Event report display) | `TimeProvider.GetUtcNow()` captured at accepted `BeginCollecting` transition; repository applies logical boundary | Missing/non-UTC/backward-inconsistent value is `SourceGap`. |
 | `EndUtc` | `CompleteSampleAsync` after analysis terminal result; startup recovery uses observed trusted UTC | Exact terminal UTC controls range attribution. Missing/duplicate/conflicting terminal is `SourceGap`. |
 | `Result` | approved analyzer terminal mapper: exactly `Clear`, `Alarm`, or `Failure` | Unknown/unmapped result is `UnknownMapping`; no terminal is published. |
 | `UserId` | separately published trusted UserManagement bridge, captured at Event start | Mandatory stable ID. Username/operator text is prohibited. Missing/changed identity is `IdentityInvalid`/`SourceGap`. |
 | `SessionId` | same trusted bridge, captured at Event start and immutable through completion | Mandatory stable ID. Events join User sessions only by exact ID. Missing/inconsistent link is `SourceGap`. |
-| `ConfigurationRevisionId` | approved canonical configuration-manifest producer, captured at Event start | Exact `sha256:<64 lowercase hex>`; settings/path/content never enters reports. Invalid/mismatch is `UnknownMapping`/`SourceGap`. |
+| `ConfigurationRevisionId` | approved canonical configuration-manifest producer, captured at Event start and matched to the activation interval | Exact `sha256:<64 lowercase hex>`; settings/path/content never enters reports. Missing/malformed identity is `IdentityInvalid`; unsupported manifest algorithm/version is `UnknownMapping`; mismatch with the applicable activation interval is `SourceGap`. A legitimate change requires an SHR-011D3 successor activation before another start. |
 | `Result = Alarm` reason code | approved Bruker code mapper creates `AlarmReason.EncodedCode` | One per distinct code, ordinal sorted. Names/compounds are prohibited. No approved mapping blocks writer readiness. D1 provider may mark `event.alarmReasons = Unknown` only where its published contract permits it. |
 | alarm strength | same approved mapper creates `AlarmReason.Strength` (`Low`/`Medium`/`High`) | Conflicting/unknown strength is `UnknownMapping`; quantity/score is not exposed. |
 | current annotation | explicit authorized `AddEventAnnotationAsync`, append-only `EventAnnotationAddedPayload`; latest valid unsuperseded correction wins | Existing `AnnotationData` has no mapping. With no explicit record, return D1 `event.annotation = Unknown`, value absent. Invalid supersession/content blocks the page. |
 | retained-data reference (not a canonical report field) | successful legacy scan repository save may provide one opaque controlled repository ID to completion | Optional support/audit link only; no file/path/scan data and never used to establish Event identity. |
 | immutable source-record identity/order tie-breaker | persistence-assigned UUIDv7 record ID | Provider-only ordering key; never shown in local non-ready outcomes. |
+| `SourceComponent` | name literal `triplequadui.substance-analyzer-core`; version from running service `AssemblyInformationalVersion` and bound in SHR-011D3 | Caller cannot override. Missing/malformed version is `UnknownMapping`; interval mismatch is `SourceGap`. |
 
 ### Event query cardinality
 
@@ -50,10 +52,10 @@ For `(activated MachineId, positive SampleEventId)`, D2 returns at most one comp
 
 | Canonical field | Authoritative source | Rule |
 |---|---|---|
-| header machine/range | activated machine + validated inclusive dates/zone | Must match activation and start at/after `T0`. |
+| header machine/range | activated machine + validated inclusive dates/zone | Must match every represented interval and start at/after generation 1 T0. |
 | division | validated request | Day/Week/Month/Year only. |
 | events | canonical terminal Event mapping above | Ordered `EndUtc`, `SampleEventId`, immutable source identity ascending. Empty is Ready with an empty sequence. |
-| restart `StartUtc` | `RecordRestartStartedAsync` with `SoftwareRestartStartedPayload.RestartCorrelationId` and FDRS `OccurredUtc` | New correlation per actual restart request; deterministic retry. |
+| restart `StartUtc` | host-captured trusted startup occurrence, committed to SHR-011D3 operation intent before `RecordRestartStartedAsync` | One startup-attempt UUID per actual host start; deterministic correlation/draft retry. |
 | restart `EndUtc` | matching `RecordRestartCompletedAsync` payload | Must be UTC and not precede start. |
 | restart completed/status | matching completed payload with controlled status/failure code | Only completed valid pairs are values. Missing, duplicate, conflicting, or cross-machine pair is `SourceGap`; failed restart may be a completed pair if D1 includes the published semantics. |
 | restart order tie-breaker | immutable start/completion record identity | Provider-only; order `StartUtc`, `EndUtc`, source identity. |
@@ -82,6 +84,8 @@ For `(activated MachineId, positive SampleEventId)`, D2 returns at most one comp
 | session attempt/lifecycle | published trusted UserManagement bridge | three typed session methods | `AppendRecordAsync` |
 | annotation | future explicit authorized report-annotation command | `AddEventAnnotationAsync` | `AppendRecordAsync` |
 | alarm reason | approved result/code/strength mapper in reporting boundary | input to `CompleteSampleAsync` | `CompleteSampleAsync` |
+| activation/control state | Common.Reports SHR-011D3 provider; owner-approved cutover/reactivation hook | `IReportSourceControlStoreV1` | atomic DataService transaction in the machine partition |
+| durable retry | producer journals; lifecycle service is sole dispatcher | `CreateOrReadOperationAsync` / `CompleteOperationAsync` | `fdrs_producer_operations_v1` through SHR-011D3 only |
 
 ## Explicit prohibited sources
 

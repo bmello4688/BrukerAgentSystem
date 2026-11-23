@@ -2,68 +2,69 @@
 
 ## Result envelope
 
-The analyzer facade exposes exactly `ReportSourceReadinessOutcomeV1` plus either one complete D1 value/page for `Ready` or no value. There is no partial value, fallback value, raw diagnostic, or unknown enum escape.
+The analyzer facade exposes exactly `ReportSourceReadinessOutcomeV1` plus either one complete D1 value/page for `Ready` or no value. There are exactly fourteen local outcomes. There is no partial value, fallback value, raw diagnostic, or unknown enum escape.
 
-Every non-`Ready` outcome has all canonical source fields absent and exposes only:
+Every non-`Ready` outcome has all canonical source fields absent and exposes only the closed outcome, the exact closed guidance code below, the trigger-selected retry disposition (`None`, `CorrectInput`, `RetryWhenReady`, `RestartQuery`, or `ContactSupport`), and an opaque local support correlation redacted from default `ToString()`. It never contains a path, record value/ID, machine/user/session identity, annotation/alarm value, cursor, exception detail, endpoint, provider/schema/collection name, token, source payload, or configuration value.
 
-- the closed outcome name;
-- one closed support guidance code from this table;
-- one closed retry disposition (`None`, `CorrectInput`, `RetryWhenReady`, `RestartQuery`, `ContactSupport`);
-- an opaque local correlation reference that is redacted from default `ToString()` and is never a record/provider identity.
+## Complete fourteen-outcome trigger/retry table
 
-It never contains a path, record value/ID, machine/user/session identity, annotation/alarm value, cursor, exception text/type/stack, endpoint/port, provider/schema/collection name, token, source payload, or configuration value.
+| # | Local outcome | Exhaustive trigger | Exact retry | Guidance | Value |
+|---:|---|---|---|---|---|
+| 1 | `Ready` | Readiness is `Ready` and D1 returns one immutable `Completed` result; contractually empty Equipment/User pages are included. | `None` | `report-source-ready` | One complete value/page. |
+| 2 | `SourceUnavailable` | Required service/storage/provider/session/alarm/config dependency is not ready; known compatible component is absent or mixed-version; readiness is disabled; snapshot admission is busy; provider work times out; a pending receipt cannot yet be resolved; or current valid configuration differs from the active binding and awaits an approved successor activation. | `RetryWhenReady`, except an expired cursor lease is exactly `RestartQuery`. | `report-source-temporarily-unavailable` | None. |
+| 3 | `HistoryUnavailable` | Valid range starts before the earliest applicable activation T0; a range crosses an unrepresented activation interval; or a valid exact Event ID is absent from all applicable activated intervals. | `CorrectInput` | `report-history-unavailable` | None. |
+| 4 | `MigrationRequired` | Deployed policy/config explicitly requests pre-T0 legacy history contrary to `ForwardOnlyAtCutover`. | `ContactSupport` | `report-history-policy-review-required` | None. |
+| 5 | `MigrationIncomplete` | Initial target partition contains preactivation Events/import receipts/migration state, or a migration marker is open/conflicting. | `ContactSupport` | `report-history-state-not-ready` | None. |
+| 6 | `IdentityInvalid` | Required machine/user/session/config identity is absent, default, syntactically malformed, or not stable; this includes a connected applied snapshot with invalid serial and malformed `sha256:` configuration identity. | `ContactSupport` | `report-identity-not-ready` | None. |
+| 7 | `IdentityCollision` | Duplicate/reused Event/session/source/operation identity, same correlation with a different fingerprint, duplicate active activation, or more than one identity claims one logical fact. | `ContactSupport` | `report-identity-conflict` | None. |
+| 8 | `MachineMismatch` | Request, record, current post-health hardware observation, or activation interval has a different valid machine identity. | `ContactSupport` | `report-machine-binding-changed` | None. |
+| 9 | `ZoneInvalid` | Zone ID is absent/unknown; local-date conversion is invalid or ambiguous under the published conversion rule; canonical rule serialization is invalid; or current fingerprint differs from the active interval. | `ContactSupport` | `report-time-zone-not-ready` | None. |
+| 10 | `SourceGap` | Native Event sequence is discontinuous; terminal/session/restart/activation sequence is missing, duplicate, conflicting, or orphaned; a receipt resolves to conflicting evidence; a record's machine/zone/source/config does not match its activation interval; or trusted clock/logical boundary is inconsistent. | `ContactSupport` | `report-source-integrity-check-required` | None. |
+| 11 | `UnknownMapping` | Request/persisted contract or payload version is unknown/unsupported; source assembly version is missing/malformed; configuration manifest algorithm/version is unsupported; or result/code/strength/lifecycle/field mapping is unknown or unapproved. A known compatible runtime version mismatch is outcome 2, not this outcome. | `ContactSupport` | `report-source-version-or-mapping-not-supported` | None. |
+| 12 | `LimitExceeded` | Caller-controlled date/string/page/cursor bound is exceeded or unprovable, or provider row/work/source limit is exceeded. | `CorrectInput` for caller-controlled bounds; `ContactSupport` for provider row/work/source limits. | `report-request-or-source-limit-exceeded` | None. |
+| 13 | `Canceled` | Caller cancellation is observed before admission, or wins the provider cancellation/publication race before a completed result is published. | `None` | `report-request-canceled` | None. |
+| 14 | `InternalFailure` | Unexpected analyzer orchestration/mapping defect after every defined trigger above has been excluded; ordinary provider failure with no published closed family maps here. | `ContactSupport` | `report-source-internal-failure` | None. |
 
-## Complete table
-
-| Local outcome | Trigger/precedence | Retry | Disclosure-safe operator guidance | Value |
-|---|---|---|---|---|
-| `Ready` | Readiness is enabled and the complete D1 result is `Completed`; an empty Equipment/User page is allowed. | `None` | `report-source-ready` | Exactly one complete D1 page/value; may be contractually empty. |
-| `SourceUnavailable` | Dependency/storage/provider not ready; contract/source version mismatch; producer disabled; snapshot busy/timeout; session/alarm/config prerequisite unavailable. | `RetryWhenReady` | `report-source-temporarily-unavailable` | None. |
-| `HistoryUnavailable` | Forward-only request begins before `T0`, or a valid exact Event ID is absent from the activated FDRS partition; no legacy lookup/migration is attempted. | `CorrectInput` | `report-history-unavailable` | None. |
-| `MigrationRequired` | Reserved fail-closed response if deployed state/config requires legacy history contrary to this ADR. It can never enable migration automatically. | `ContactSupport` | `report-history-policy-review-required` | None. |
-| `MigrationIncomplete` | Target partition contains unexpected preactivation events/import receipts, a migration marker, or unclosed migration state. | `ContactSupport` | `report-history-state-not-ready` | None. |
-| `IdentityInvalid` | Machine/user/session/config identity is absent, malformed, default, or cannot be proven stable. | `ContactSupport` | `report-identity-not-ready` | None. |
-| `IdentityCollision` | Duplicate Event/session/source identity, conflicting correlation, duplicate machine binding, or more than one identity claims one logical fact. | `ContactSupport` | `report-identity-conflict` | None. |
-| `MachineMismatch` | Request/source/current hardware identity differs from activated machine. | `ContactSupport` | `report-machine-binding-changed` | None. |
-| `ZoneInvalid` | Zone missing/unknown, conversion invalid/ambiguous outside published rules, or current rule fingerprint differs from activation. | `ContactSupport` | `report-time-zone-not-ready` | None. |
-| `SourceGap` | Discontinuous native Event source, missing/duplicate/conflicting terminal, orphan/inconsistent session link, incomplete restart pair, unresolved receipt, or clock/config boundary inconsistency. | `ContactSupport` | `report-source-integrity-check-required` | None. |
-| `UnknownMapping` | Unknown/unsupported source version, payload/result/code/strength/lifecycle/field code, or unapproved mapping. | `ContactSupport` | `report-source-version-or-mapping-not-supported` | None. |
-| `LimitExceeded` | D1 date/string/page/cursor/row/work bound is exceeded or cannot be proven. | `CorrectInput` for request bounds; otherwise `ContactSupport` | `report-request-or-source-limit-exceeded` | None. |
-| `Canceled` | Caller cancellation wins before admission or at a D1 cancellation boundary before result publication. | `None` | `report-request-canceled` | None. |
-| `InternalFailure` | Unexpected analyzer mapping/orchestration failure after known outcomes are excluded. | `ContactSupport` | `report-source-internal-failure` | None. |
+The two outcomes with trigger-selected retries are deterministic: `SourceUnavailable + LeaseExpired -> RestartQuery`; every other `SourceUnavailable -> RetryWhenReady`. `LimitExceeded + CallerBound -> CorrectInput`; `LimitExceeded + ProviderRowWorkOrSourceBound -> ContactSupport`. No caller/provider text selects a retry.
 
 ## Deterministic precedence
 
-When more than one condition is observable before publication, evaluate in this order:
+Evaluate all observable facts in this order and stop at the first row:
 
-1. cancellation already requested;
-2. unsupported/malformed contract request or source version;
-3. readiness dependencies: machine, zone, clock, storage, session bridge, alarm mapper, config/source version;
-4. history/migration state;
-5. D1 admission/request/lease limits;
-6. machine/identity/source integrity and mapping;
-7. cancellation/timeout during provider work according to the published D1/D2 race rule;
-8. publish `Ready` once only.
+1. caller cancellation already requested -> `Canceled`;
+2. local request validation -> `UnknownMapping`, `IdentityInvalid`, `ZoneInvalid`, `LimitExceeded`, or `MigrationRequired` by the exact definitions above;
+3. readiness and current binding checks -> `MachineMismatch`, `ZoneInvalid`, `UnknownMapping`, `SourceUnavailable`, then `IdentityInvalid`;
+4. activation/history state -> `MigrationIncomplete`, `HistoryUnavailable`;
+5. cursor lease check -> `SourceUnavailable/RestartQuery`; new-snapshot capacity -> `SourceUnavailable/RetryWhenReady`;
+6. provider integrity -> `IdentityCollision`, `MachineMismatch`, `SourceGap`, `UnknownMapping`, then provider `LimitExceeded`;
+7. provider cancellation beats completed publication -> `Canceled`; provider timeout/unavailable -> `SourceUnavailable/RetryWhenReady`;
+8. defined provider failure -> mapped family below; undefined failure -> `InternalFailure`;
+9. publish `Ready` exactly once.
 
-A committed write/result already accepted by persistence remains accepted even if caller cancellation arrives afterward. A published terminal query result is final.
+A committed write accepted by persistence remains accepted even if cancellation arrives later. The producer resolves and journals that receipt without the canceled request token. A D1 completed result that wins the atomic publication race remains final.
 
-## D1/D2 mapping
+## D1/D2 mapping requirement
 
-The implementation maps the published query result without inspecting provider diagnostics:
+D1 publication must expose closed result/reason values sufficient for this exact mapping; otherwise TQ-011B remains blocked and this ADR is amended. Product code never inspects diagnostic text.
 
-| Shared result family | Local outcome |
+| Shared semantic family | Local result |
 |---|---|
-| `Completed/None/None` | `Ready` |
-| Event `NotFound/RequestedEventNotFound` | `HistoryUnavailable`; no Event value and no legacy lookup |
-| request rejection for machine/range/zone/division/event/page/cursor | `IdentityInvalid`, `HistoryUnavailable`, `ZoneInvalid`, or `LimitExceeded` according to the already validated field; no provider text |
-| snapshot capacity/storage unavailable/query timeout | `SourceUnavailable` |
-| lease expired | `SourceUnavailable` with `RestartQuery` |
-| operation canceled | `Canceled` |
-| corrupt/duplicate/inconsistent/discontinuous source | `IdentityCollision`, `MachineMismatch`, or `SourceGap` by the closed reason |
-| unknown source code/version | `UnknownMapping` |
-| row/work/string limit | `LimitExceeded` |
-| provider failure | `InternalFailure` |
+| completed, no failure | `Ready/None` |
+| exact Event not found | `HistoryUnavailable/CorrectInput` |
+| invalid request identity | `IdentityInvalid/ContactSupport` |
+| invalid range before T0 | `HistoryUnavailable/CorrectInput` |
+| invalid/changed zone | `ZoneInvalid/ContactSupport` |
+| caller request bound | `LimitExceeded/CorrectInput` |
+| row/work/source bound | `LimitExceeded/ContactSupport` |
+| snapshot busy, storage unavailable, timeout | `SourceUnavailable/RetryWhenReady` |
+| lease expired | `SourceUnavailable/RestartQuery` |
+| operation canceled before publication | `Canceled/None` |
+| duplicate/collision | `IdentityCollision/ContactSupport` |
+| machine mismatch | `MachineMismatch/ContactSupport` |
+| corrupt/discontinuous/inconsistent source | `SourceGap/ContactSupport` |
+| unknown source code/version | `UnknownMapping/ContactSupport` |
+| defined provider failure not represented above | `InternalFailure/ContactSupport` |
 
 ## Logging/support rule
 
-Structured logs may include only local outcome, closed guidance code, component/version, and a generated redacted support correlation. Sensitive values stay inside authorized FDRS/query objects. `Ready` pages, cursor bytes, identities, annotations, alarms, tokens, exceptions, provider types, endpoints, collection names, and paths are never serialized to normal logs or telemetry. Export/print cannot expand query authorization or diagnostics.
+Structured logs may include only local outcome, closed guidance code, component/version, readiness transition, and a generated redacted support correlation. `Ready` pages, cursor bytes, identities, annotations, alarms, tokens, exceptions, provider types, endpoints, collection names, paths, and activation/configuration values are never serialized to ordinary logs or telemetry. Export/print cannot expand query authorization or diagnostics.
