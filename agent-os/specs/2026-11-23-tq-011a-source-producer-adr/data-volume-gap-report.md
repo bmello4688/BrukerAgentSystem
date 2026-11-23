@@ -14,7 +14,7 @@ The lack of a sanctioned production distribution is not hidden as an estimate. C
 | Current sample number wraps and can be sourced from legacy metadata/settings. | It cannot prove positive monotonic FDRS identity or gaps. |
 | Published DataService FDRS default capacity is 50,000 aggregates per repository instance, while D1 permits at most 10,000 returned rows and 20,000 work units per snapshot. | A legal storage population can exceed one report snapshot. The provider must return `LimitExceeded`; it must not truncate. |
 | D1 page size is 1-500, active snapshots are 4, lease is absolute 5 minutes, and provider work per call is 30 seconds. | Product code must page through one lease, never fan out unbounded parallel snapshots. |
-| At `T0`, the activated target partition must contain exactly zero preactivation Event aggregates and zero import/import-receipt state. | This is the only accepted initial population for `ForwardOnlyAtCutover`; any nonzero count is `MigrationIncomplete`. |
+| Generation-1 `T0` equals the restart occurrence captured at actual host `StartAsync` entry; the activation transaction requires an empty target partition and the first restart-start occurs exactly at T0. | This is the only accepted initial population/boundary for `ForwardOnlyAtCutover`; any pre-T0 operation/record or nonzero preactivation Event/import/import-receipt state is `MigrationIncomplete` before activation or `SourceGap` after activation. |
 | Published FDRS has append receipts but no activation binding or product-operation journal. | SHR-011D3 adds bounded pending-operation reads (1-500) and immutable activation generations; TQ-011B cannot use files/memory as durable retry state. |
 
 ## Bound fit
@@ -39,7 +39,7 @@ Minimum work is at least the top-level candidate count. Alarm reasons, annotatio
 
 Tolerance is exactly zero for report-visible native FDRS facts:
 
-- zero duplicate/reused `SampleEventId` within a machine;
+- zero duplicate/reused `SampleEventId` within a machine; duplicate identity claim is `IdentityCollision`, while a missing native sequence member is `SourceGap`;
 - zero missing IDs inside the committed native sequence after `T0`, except a retention condition explicitly represented by the published provider contract; inability to prove continuity is `SourceGap`;
 - zero Events with multiple/conflicting terminal records;
 - zero terminal Events without stable user/session/config identity;
@@ -48,6 +48,7 @@ Tolerance is exactly zero for report-visible native FDRS facts:
 - zero unknown/unapproved result/alarm/lifecycle codes represented as values;
 - zero unresolved ambiguous write receipts when readiness is enabled;
 - zero pending SHR-011D3 operation rows when readiness is enabled;
+- zero operation or record occurrence before generation-1 T0, and restart start occurrence exactly equal to generation-1 T0;
 - zero cross-machine records or machine/zone/source/config mismatch against the activation interval containing each occurrence.
 
 Retention must not silently turn a requested range into a successful partial page. If D2 cannot prove the requested complete snapshot because required source records were retained/evicted, map its integrity/unavailability result to `SourceGap`/`HistoryUnavailable` according to the published reason; never synthesize zero counts.

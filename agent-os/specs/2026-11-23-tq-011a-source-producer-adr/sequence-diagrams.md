@@ -59,7 +59,7 @@ sequenceDiagram
     O->>H: deploy exact approved product + gitlinks, disabled
     H->>G: Disabled
     O->>H: quiesce sample admission and report requests
-    H->>H: capture startup UUID + trusted occurrence; construct source; no draft
+    H->>H: at StartAsync entry capture startup UUID + restart occurrence; construct source; no draft
     H->>C: initialize schema/capability
     H->>R: initialize schema/capability
     H->>HW: await health Serving, then subsequent connected DevicesChanged snapshot
@@ -69,9 +69,10 @@ sequenceDiagram
     alt any check fails
         H->>G: keep Disabled; closed zero-value outcome
     else all checks pass
-        H->>C: ActivateAsync(binding); atomically re-prove zero state + create generation 1/pointer; commit defines T0
-        H->>C: journal restart-start intent
-        H->>R: append restart-start
+        H->>C: TransitionActivationAsync(Initial, ForwardOnlyCutover, ActivatedUtc=restart occurrence)
+        C-->>H: generation 1 committed; T0 = captured occurrence (not commit wall clock)
+        H->>C: journal RestartStarted restart/UUID/started at OccurredUtc=T0
+        H->>R: append restart-start at exactly T0
         H->>C: accept restart-start receipt
         H->>G: WritersEnabled, QueriesDisabled
         H->>R: deterministic producer/reconciliation probes
@@ -87,7 +88,7 @@ sequenceDiagram
     end
 ```
 
-There is no stage in which queries are enabled before compatible writers or in which legacy data is consulted.
+There is no stage in which queries are enabled before compatible writers or in which legacy data is consulted. The initial-empty transaction and first-operation gate prove that no control operation or FDRS record has `OccurredUtc < T0`.
 
 ## 3. Ambiguous acceptance and process restart
 
@@ -182,14 +183,19 @@ sequenceDiagram
     participant D as Trusted dependencies
     participant G as Readiness
 
-    H->>H: capture startup-attempt UUID + TimeProvider UTC
+    H->>H: at StartAsync entry capture startup-attempt UUID + TimeProvider UTC occurrence
     H->>L: pass UUID/OccurredUtc
     L->>G: Disabled
     L->>L: construct authoritative SourceComponent
     L->>C: InitializeAsync
     L->>R: InitializeAsync
     L->>HW: subscribe DevicesChanged; await health Serving; await later connected snapshot
-    L->>C: read/match active activation or owner-approved ActivateAsync
+    alt no activation (initial cutover)
+        L->>C: TransitionActivationAsync(Initial, ForwardOnlyCutover, ActivatedUtc=captured occurrence)
+        C-->>L: generation 1 T0 = captured occurrence
+    else activation exists
+        L->>C: read and exactly match active activation
+    end
     L->>C: read pending operations
     loop each pending operation
         L->>R: resolve/retry identical stored draft
@@ -197,8 +203,8 @@ sequenceDiagram
     end
     L->>R: recover active Event as Failure
     L->>D: end owning session as recovery/incomplete
-    L->>C: journal restart-start
-    L->>R: append restart-start
+    L->>C: journal RestartStarted with closed kind/phase and exact CBE fingerprint
+    L->>R: append restart-start (generation 1: OccurredUtc = T0)
     L->>D: await session/config/alarm/provider + algorithm warmup
     L->>L: reconcile and run conformance probes
     L->>C: journal restart completion
@@ -206,7 +212,7 @@ sequenceDiagram
     L->>G: WritersEnabledQueriesDisabled, then Ready
 ```
 
-No FDRS draft is constructed before storage initialization, authoritative source construction, trusted occurrence capture, machine observation, and activation binding. No new draft is admitted before pending-operation and sample/session recovery.
+No FDRS draft is constructed before storage initialization, authoritative source construction, trusted occurrence capture, machine observation, and activation binding. On initial cutover, activation commits the previously captured occurrence as T0 and the first draft uses that same value; no pre-T0 record is possible. No later new draft is admitted before pending-operation and sample/session recovery.
 
 ## 6. Rollback decision
 
@@ -216,7 +222,7 @@ flowchart TD
     B -- No --> C[Stop; revert TQ commit and Reports gitlink]
     B -- Yes --> D[Run exact reconciliation]
     D --> E{Any accepted post-T0 write?}
-    E -- No --> F[Retain activation; owner approves rolled-back close plus successor at new T0]
+    E -- No --> F[Typed Rollback / ZeroWriteRollback names current and compatible target; atomically close plus copied successor at new T0]
     F --> H
     E -- Yes --> G[Preserve all FDRS records]
     G --> H[Deploy last compatible producer/provider or roll forward]

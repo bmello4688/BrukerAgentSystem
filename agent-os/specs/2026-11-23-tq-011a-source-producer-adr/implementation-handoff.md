@@ -10,7 +10,7 @@
 |---|---|
 | TQ-011A publication | Exact accepted planning SHA plus independent Reviewer Integration GO. |
 | SHR-011D1 | Accepted/published Common.Reports SHA; exact `IFdrsReportSourceQuery` symbols/signatures and conformance command match the ADR. |
-| SHR-011D3 | Accepted/published Common.Reports SHA containing exact `IReportSourceControlStoreV1`, `DataServiceReportSourceControlStoreV1`, three named collections, atomic activation/reactivation/rollback semantics, durable operation journal, and conformance command from the [contract story](../2026-11-23-shr-011d3-report-source-control-store/story.md). |
+| SHR-011D3 | Accepted/published Common.Reports SHA containing exact `IReportSourceControlStoreV1`, typed `Initial`/`Successor`/`Rollback` modes and closed reasons, atomic transition table, nine operation kinds/eight phases, CBE-v1 identity/draft vectors, `DataServiceReportSourceControlStoreV1`, three named collections, durable journal, and conformance commands from the [contract story](../2026-11-23-shr-011d3-report-source-control-store/story.md). |
 | SHR-011D2 | Accepted/published Common.Reports SHA descendant of D1 and D3; exact `DataServiceFdrsReportSourceQuery` provider/project, activation-history snapshot fingerprint/interval validation, and tests match the ADR. |
 | actor/session | Accepted bridge contract/implementation SHA proving durable UserId/SessionId/attempt lifecycle and no token/display-name persistence. |
 | alarm mapping | Named Bruker SME/owner approval, versioned controlled code/strength mapping, exhaustive unknown-value tests. |
@@ -84,8 +84,8 @@ The only hardware behavior interaction is read-only identity observation and gat
 
 1. Pin accepted Reports (and conditional Services) gitlinks; add analyzer/test project references.
 2. Implement pure machine, canonical zone bytes/hash, trusted time, activation interval, source-component, and all fourteen outcome validations.
-3. Implement SHR-011D3 consumer and producer facade. Journal the exact intent before every repository call; only the producer/lifecycle dispatcher resolves/retries pending operations.
-4. Implement readiness gate/lifecycle/reconciler, disabled by default, in the frozen startup order: construct source/capture startup occurrence; initialize D3/FDRS; await health plus subsequent connected snapshot; bind zone/config/contracts; load/activate; resolve pending operations; recover sample/session; append restart start; warm/reconcile; append completion; writers then queries.
+3. Implement SHR-011D3 consumer and producer facade. Use only published closed enums/CBE-v1 helpers and vectors; journal the exact intent before every repository call. Only the producer/lifecycle dispatcher resolves/retries pending operations.
+4. Implement readiness gate/lifecycle/reconciler, disabled by default, in the frozen startup order: at actual `StartAsync` entry capture startup UUID/occurrence; construct source; initialize D3/FDRS; await health plus subsequent connected snapshot; bind zone/config/contracts; load activation or commit generation 1 with `T0 = captured occurrence`; resolve pending operations; recover sample/session; append restart start at exactly T0 for generation 1; warm/reconcile; append completion; writers then queries.
 5. Wire trusted session/config/alarm dependencies; prove prohibited fields cannot enter drafts/logs and legitimate configuration change requires a successor activation.
 6. Refactor exact sample admission/completion hooks to await intent and persistence; derive correlations from durable logical IDs and keep Event ID/correlation stable.
 7. Register D2 and D3 providers plus query facade in `ServiceHost`; prove no endpoint/direct schema access.
@@ -100,7 +100,9 @@ Add tests under `ReportSources/**` for:
 - canonical zone byte-for-byte vectors and both published hashes; every `TimeZoneInfo` property including `BaseUtcOffsetDelta`/`NoDaylightTransitions`; invalid ID; DST ambiguous/invalid boundaries; rule fingerprint change;
 - clock UTC/default/backstep behavior and deterministic `TimeProvider` injection;
 - authoritative source name and assembly informational version; readiness default disabled and every gate/mixed-version failure;
-- activation initial/exact retry/collision/pointer corruption/successor/config-only reactivation/zero-write rollback/post-write compatibility; accepted start before acquisition; rejection/ambiguous acceptance prevents acquisition; durable operation/correlation retry across each crash boundary;
+- activation typed mode/reason matrix, initial/exact retry/collision/pointer corruption/successor/config-only transition/typed zero-write rollback/post-write compatibility; multiple-active maps only to `IdentityCollision`, while missing/corrupt transition maps only to `SourceGap`;
+- CBE-v1 independent preimage/hash/UUID vectors; all nine operation kinds/eight phase tokens/logical-ID grammars; draft fields/list/null normalization; durable operation/correlation retry across every crash boundary;
+- generation-1 `T0` equals the captured restart occurrence, first restart-start occurrence equals T0, no pre-T0 operation/record; accepted sample start before acquisition; rejection/ambiguous acceptance prevents acquisition;
 - exactly one terminal for Clear/Alarm/Failure, same Event ID, no wrap/reuse, cancellation after commit;
 - interrupted Event failure before recovery session end; duplicate restart/session/annotation retry;
 - trusted UserId/SessionId exact join; denied/open/incomplete/completed sessions; no username/token/time join;
@@ -110,7 +112,7 @@ Add tests under `ReportSources/**` for:
 - forward-only range before/at `T0`, unexpected preactivation/import state, no legacy reader call;
 - duplicates/gaps/conflicting terminals/orphan sessions/incomplete restarts/machine/zone/config mismatch;
 - exact frozen startup/restart ordering and readiness only after storage, binding, pending-operation recovery, warmup, reconciliation, and completion receipt;
-- exhaustive fourteen-outcome trigger/precedence/retry matrix, including lease expiry `RestartQuery` and both `LimitExceeded` retry variants; every non-ready outcome has no value and passes a disclosure scan;
+- exhaustive disjoint fourteen-trigger matrix and precedence, including invalid identity while readiness is disabled, multiple-active versus missing activation evidence, lease expiry `RestartQuery`, and both `LimitExceeded` variants; every non-ready outcome has no value and passes disclosure scan;
 - rollback with no write and post-write compatibility block.
 
 Use synthetic controlled data only. Hardware/simulator qualification verifies only the serial/readiness transition and sample admission sequencing; it does not relax contract tests.
@@ -143,7 +145,7 @@ The shipped default is disabled. The gate has only `Disabled`, `WritersEnabledQu
 
 ## Gitlink and runtime rollback
 
-- Pre-T0: revert the TQ-011B commit and compatible gitlinks. Proven zero-write after T0: retain the activation; atomically close it as rolled back with an owner-authorized compatible successor at a new T0, or remain disabled. Restore Reports to `fd705711aa17ab23e34efa1bcf52422ee50868fd` only when that baseline can read the retained D3 history; otherwise deploy the last compatible Reports SHA. Restore Services conditionally and keep DataService gitlink unchanged.
+- Pre-T0: revert the TQ-011B commit and compatible gitlinks. Proven zero accepted/pending writes after T0: retain history and call typed D3 `Rollback/ZeroWriteRollback` with current predecessor and named compatible target; atomically close current as rolled back and create a copied active successor at a new T0, or remain disabled. Restore Reports to `fd705711aa17ab23e34efa1bcf52422ee50868fd` only when that baseline reads the retained D3 history; otherwise deploy the last compatible Reports SHA. Restore Services conditionally and keep DataService gitlink unchanged.
 - Post-write: do not restore an incompatible Reports/producer set. Preserve data and deploy the last compatible accepted SHAs or a reviewed roll-forward.
 - No rollback deletes/rewrites FDRS/control or legacy data, resets IDs, edits activation history/T0, or enables fallback.
 - The **named TripleQuadUI product release owner recorded in the deployment/cutover record** owns the rollback decision. TQ-011B cannot be released with an unnamed/generic owner.

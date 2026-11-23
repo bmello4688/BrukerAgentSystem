@@ -20,7 +20,7 @@
 | Event ID | positive FDRS `SampleEventId` | Legacy sample number/repository ID never maps. Missing exact ID is D1 `NotFound`, mapped locally to zero-value `HistoryUnavailable`. |
 | page size/cursor | D1 page request, D2 integrity-protected cursor | Enforce 1-500 and 512 UTF-8 bytes; no cursor inspection in product code. |
 | completed/request time | injected `TimeProvider.GetUtcNow()` | Must be UTC and pass clock/readiness checks. |
-| activation interval | SHR-011D3 immutable generation whose `[T0, successor T0)` contains the occurrence | Missing/overlapping generation or a record whose machine/zone/source/query/config fields do not match its interval is `SourceGap`. |
+| activation interval | SHR-011D3 immutable generation whose `[T0, successor T0)` contains the occurrence; generation-1 T0 is the exact captured restart occurrence | Multiple active claimants are `IdentityCollision`; missing/overlapping/corrupt interval evidence or a record whose machine/zone/source/query/config fields do not match its interval is `SourceGap`. |
 
 ## Canonical Event fields
 
@@ -55,7 +55,7 @@ For `(activated MachineId, positive SampleEventId)`, D2 returns at most one comp
 | header machine/range | activated machine + validated inclusive dates/zone | Must match every represented interval and start at/after generation 1 T0. |
 | division | validated request | Day/Week/Month/Year only. |
 | events | canonical terminal Event mapping above | Ordered `EndUtc`, `SampleEventId`, immutable source identity ascending. Empty is Ready with an empty sequence. |
-| restart `StartUtc` | host-captured trusted startup occurrence, committed to SHR-011D3 operation intent before `RecordRestartStartedAsync` | One startup-attempt UUID per actual host start; deterministic correlation/draft retry. |
+| restart `StartUtc` | one trusted occurrence captured at actual host `StartAsync` entry | One startup-attempt UUID per actual host start; on generation 1 the activation commits this exact value as T0 and restart start occurs exactly at T0; later restarts must be at/after applicable T0. Deterministic CBE-v1 correlation/draft retry. |
 | restart `EndUtc` | matching `RecordRestartCompletedAsync` payload | Must be UTC and not precede start. |
 | restart completed/status | matching completed payload with controlled status/failure code | Only completed valid pairs are values. Missing, duplicate, conflicting, or cross-machine pair is `SourceGap`; failed restart may be a completed pair if D1 includes the published semantics. |
 | restart order tie-breaker | immutable start/completion record identity | Provider-only; order `StartUtc`, `EndUtc`, source identity. |
@@ -84,8 +84,8 @@ For `(activated MachineId, positive SampleEventId)`, D2 returns at most one comp
 | session attempt/lifecycle | published trusted UserManagement bridge | three typed session methods | `AppendRecordAsync` |
 | annotation | future explicit authorized report-annotation command | `AddEventAnnotationAsync` | `AppendRecordAsync` |
 | alarm reason | approved result/code/strength mapper in reporting boundary | input to `CompleteSampleAsync` | `CompleteSampleAsync` |
-| activation/control state | Common.Reports SHR-011D3 provider; owner-approved cutover/reactivation hook | `IReportSourceControlStoreV1` | atomic DataService transaction in the machine partition |
-| durable retry | producer journals; lifecycle service is sole dispatcher | `CreateOrReadOperationAsync` / `CompleteOperationAsync` | `fdrs_producer_operations_v1` through SHR-011D3 only |
+| activation/control state | Common.Reports SHR-011D3 provider; owner-approved cutover/reactivation/rollback hook | `IReportSourceControlStoreV1.TransitionActivationAsync` with closed mode/reason | atomic DataService transition in the machine partition |
+| durable retry | producer journals; lifecycle service is sole dispatcher | `CreateOrReadOperationAsync` / `CompleteOperationAsync`; nine enum kinds and CBE-v1 identities/fingerprints | `fdrs_producer_operations_v1` through SHR-011D3 only |
 
 ## Explicit prohibited sources
 
