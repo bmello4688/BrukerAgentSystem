@@ -22,7 +22,8 @@ All runbooks use closed outcomes from [outcomes.md](outcomes.md). Support logs c
 5. Initialize SHR-011D3 and FDRS schemas/capabilities before any activation read, machine-partition draft, or query.
 6. Validate, in order:
    - accepted D1/D2 versions and exact provider registration;
-   - hardware health is `Serving`, then observe a subsequent `DevicesChanged`-applied snapshot with `ConnectionState.Connected`; validate serial and compute `tq-machine-v1` ID;
+   - hardware health is `Serving`, then observe a subsequent `DevicesChanged`-applied snapshot with `ConnectionState.Connected`; validate serial, compute `tq-machine-v1` ID, and latch it as the sole candidate for this startup/activation attempt;
+   - compare every later qualifying observation in the attempt to the latch; any distinct syntactically valid serial is `MachineMismatch`, never `IdentityCollision`, and aborts activation without replacing the candidate;
    - `ReportsV1:ReportingZoneId`; compute `tq-zone-v1` fingerprint;
    - injected trusted clock and logical UTC boundary;
    - trusted session bridge, configuration revision, authoritative source component/version, approved alarm map;
@@ -74,7 +75,7 @@ The lifecycle hosted service is the sole restart dispatcher. Repeated callbacks 
 
 ## E. Machine, zone, source, contract, or configuration change runbook
 
-1. On any syntactically valid machine-ID difference or zone mismatch, atomically disable and return `MachineMismatch`/`ZoneInvalid`. On a valid new configuration/source/contract version, disable with `SourceUnavailable/RetryWhenReady` pending owner decision. Missing/corrupt activation or source evidence is `SourceGap`; machine disagreement never is.
+1. On any syntactically valid machine-ID difference from the latched startup candidate before activation or the committed binding afterward—including a different valid serial before activation and a second distinct valid serial in one attempt—atomically disable and return `MachineMismatch`. A zone mismatch returns `ZoneInvalid`. On a valid new configuration/source/contract version, disable with `SourceUnavailable/RetryWhenReady` pending owner decision. Missing/corrupt activation or source evidence is `SourceGap`; machine disagreement never is. `IdentityCollision` applies only to duplicate/conflicting claims whose machine IDs are equal.
 2. Preserve every record, activation generation, and operation row. Do not rewrite UTC, move records, merge machine partitions, or edit the pointer outside SHR-011D3.
 3. Named release owner records an approval reference and confirms the hardware replacement, rule update, compatible source/contract release, or canonical configuration revision.
 4. Replacement machine: call typed `Initial/MachineReplacement` in the new MachineId partition. Same machine: call typed `Successor` with the closed reason matching the changed field family, `ReplacesActivationId` equal to current, and T0 strictly after the prior T0 and last committed boundary. The transaction supersedes the prior generation and installs the successor. A multi-family compatible release uses only `CompatibleReleaseChanged`.

@@ -63,7 +63,13 @@ sequenceDiagram
     H->>C: initialize schema/capability
     H->>R: initialize schema/capability
     H->>HW: await health Serving, then subsequent connected DevicesChanged snapshot
-    H->>H: validate D1/D2/D3 SHA, machine hash, zone bytes/hash, clock, session, alarm, config
+    H->>H: latch first valid machine candidate for this activation attempt
+    HW-->>H: any later qualifying snapshot in same attempt
+    alt syntactically valid machine differs from latch
+        H->>G: keep Disabled; MachineMismatch; do not replace latch
+    else machine equals latch
+        H->>H: validate D1/D2/D3 SHA, machine hash, zone bytes/hash, clock, session, alarm, config
+    end
     H->>C: prove no activation/pending operation state
     H->>R: prove no active sample/session and zero preactivation/import state
     alt any check fails
@@ -214,7 +220,7 @@ sequenceDiagram
     L->>G: Ready (queries enabled)
 ```
 
-No FDRS draft is constructed before storage initialization, authoritative source construction, trusted occurrence capture, machine observation, and activation binding. On initial cutover, activation commits the previously captured occurrence as T0 and the first draft uses that same value; no pre-T0 record is possible. No later new draft is admitted before pending-operation and sample/session recovery. `RestartStarted` never enables writers: reconciliation, conformance, and the successful `RestartCompleted` accepted receipt must finish first; writers then queries are enabled in separate ordered transitions.
+No FDRS draft is constructed before storage initialization, authoritative source construction, trusted occurrence capture, machine observation, and activation binding. The first qualifying machine observation is latched for the startup attempt; a different valid serial before activation or a second distinct valid serial in that attempt produces `MachineMismatch`, never `IdentityCollision`, and cannot replace the latch. Only duplicate/conflicting equal-machine claims can produce `IdentityCollision`. On initial cutover, activation commits the previously captured occurrence as T0 and the first draft uses that same value; no pre-T0 record is possible. No later new draft is admitted before pending-operation and sample/session recovery. `RestartStarted` never enables writers: reconciliation, conformance, and the successful `RestartCompleted` accepted receipt must finish first; writers then queries are enabled in separate ordered transitions.
 
 ## 6. Rollback decision
 
