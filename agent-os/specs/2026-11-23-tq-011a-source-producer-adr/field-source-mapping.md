@@ -20,7 +20,7 @@
 | Event ID | positive FDRS `SampleEventId` | Legacy sample number/repository ID never maps. Missing exact ID is D1 `NotFound`, mapped locally to zero-value `HistoryUnavailable`. |
 | page size/cursor | D1 page request, D2 integrity-protected cursor | Enforce 1-500 and 512 UTF-8 bytes; no cursor inspection in product code. |
 | completed/request time | injected `TimeProvider.GetUtcNow()` | Must be UTC and pass clock/readiness checks. |
-| activation interval | SHR-011D3 immutable generation whose `[T0, successor T0)` contains the occurrence; generation-1 T0 is the exact captured restart occurrence | Multiple active claimants are `IdentityCollision`; missing/overlapping/corrupt interval evidence or a record whose machine/zone/source/query/config fields do not match its interval is `SourceGap`. |
+| activation interval | SHR-011D3 immutable generation whose `[T0, successor T0)` contains the occurrence; generation-1 T0 is the exact captured restart occurrence | First classify every record/activation machine claim: syntactically valid and unequal to the committed binding is only `MachineMismatch`. After all claims equal, multiple active claimants are `IdentityCollision`, while missing/overlapping/corrupt interval or other source evidence is `SourceGap`. |
 
 ## Canonical Event fields
 
@@ -28,7 +28,7 @@ The same Event projection is used by Equipment, Event, and User queries.
 
 | Canonical field | Authoritative producer/API | Provider projection and invalid behavior |
 |---|---|---|
-| `MachineId` | activated producer binding captured in `StartSampleCommand.MachineId` | Exact partition/envelope match; inconsistency is zero-value `MachineMismatch`/`SourceGap`. |
+| `MachineId` | activated producer binding captured in `StartSampleCommand.MachineId` | Validate every request, hardware, partition/envelope, stored-record, and activation machine claim first: absent/default/malformed is `IdentityInvalid`; syntactically valid and unequal to the committed binding is only `MachineMismatch`; equal proceeds to later evidence checks. Missing/corrupt non-identity activation/source evidence after equality is `SourceGap`. |
 | `SampleEventId` | `IFdrsRepository.StartSampleAsync` atomic high-water allocation | Positive, never reset/wrapped/reused. Duplicate/collision is `IdentityCollision`; discontinuity is `SourceGap`. |
 | `EventCorrelationId` (ordering/integrity source identity) | RFC-4122 UUIDv5 over activation ID, `sample-start`, and the acceptance-attempt UUID already committed in SHR-011D3 | Exact deterministic retry only. Conflicting correlation for one Event is `IdentityCollision`; never exposed as operator guidance. |
 | `StartUtc` (source integrity, not Event report display) | `TimeProvider.GetUtcNow()` captured at accepted `BeginCollecting` transition; repository applies logical boundary | Missing/non-UTC/backward-inconsistent value is `SourceGap`. |
@@ -46,7 +46,7 @@ The same Event projection is used by Equipment, Event, and User queries.
 
 ### Event query cardinality
 
-For `(activated MachineId, positive SampleEventId)`, D2 returns at most one complete terminal Event. Zero is D1 `NotFound` and local `HistoryUnavailable`; more than one identity/terminal, an open Event requested as terminal, or inconsistent machine/session is a zero-value integrity result mapped locally to `IdentityCollision`, `SourceGap`, or `MachineMismatch`.
+For `(activated MachineId, positive SampleEventId)`, D2 returns at most one complete terminal Event. Zero is D1 `NotFound` and local `HistoryUnavailable`. First, every syntactically valid machine-ID difference is `MachineMismatch` regardless of whether it appears in the request, partition/envelope, stored Event, or activation. Only after machine equality, more than one identity/terminal is `IdentityCollision`, while an open Event requested as terminal or missing/corrupt session/source evidence is `SourceGap`.
 
 ## Equipment query fields
 
@@ -57,7 +57,7 @@ For `(activated MachineId, positive SampleEventId)`, D2 returns at most one comp
 | events | canonical terminal Event mapping above | Ordered `EndUtc`, `SampleEventId`, immutable source identity ascending. Empty is Ready with an empty sequence. |
 | restart `StartUtc` | one trusted occurrence captured at actual host `StartAsync` entry | One startup-attempt UUID per actual host start; on generation 1 the activation commits this exact value as T0 and restart start occurs exactly at T0; later restarts must be at/after applicable T0. Deterministic CBE-v1 correlation/draft retry. |
 | restart `EndUtc` | matching `RecordRestartCompletedAsync` payload | Must be UTC and not precede start. |
-| restart completed/status | matching completed payload with controlled status/failure code | Only completed valid pairs are values. Missing, duplicate, conflicting, or cross-machine pair is `SourceGap`; failed restart may be a completed pair if D1 includes the published semantics. |
+| restart completed/status | matching completed payload with controlled status/failure code | Only completed valid pairs are values. First, a syntactically valid machine-ID difference in either record is `MachineMismatch`. After machine equality, missing/corrupt pair evidence is `SourceGap` and duplicate identity claims are `IdentityCollision`. A failed restart may be a completed pair if D1 includes the published semantics. |
 | restart order tie-breaker | immutable start/completion record identity | Provider-only; order `StartUtc`, `EndUtc`, source identity. |
 
 ## User query fields

@@ -29,9 +29,9 @@ All runbooks use closed outcomes from [outcomes.md](outcomes.md). Support logs c
    - no mixed writer/query/source/config version.
 7. Read only FDRS/control metadata for the derived target partition. Require zero Event aggregates, imports/import receipts, pending/accepted operations, active Event, and prior activation/migration marker. Any unexpected state is `MigrationIncomplete`; stop without changing it.
 8. Call SHR-011D3 `TransitionActivationAsync` with `Mode = Initial`, `Reason = ForwardOnlyCutover`, and `ActivatedUtc =` the exact step-4 restart occurrence. Its one transaction re-proves empty state, creates generation 1/pointer, and commits that captured value as T0; transaction wall-clock time never replaces it. Record no raw serial, zone bytes, or configuration values.
-9. Create the first allowed operation with kind `RestartStarted` and logical ID `restart/<startup-attempt UUID>/started`; its draft `OccurredUtc` must equal T0 exactly. Append it, resolve its receipt, and assert no row/operation occurrence is before T0. Then enable writers while keeping queries disabled. Run synthetic producer probes only in an approved qualification partition/environment; production activation uses non-mutating checks unless separately approved.
-10. Reconcile with runbook C and run D1/D2 empty/exact machine/zone/cursor conformance probes.
-11. Journal/append restart completion. Enable query readiness only after its accepted receipt and zero discrepancy. Record only version SHAs, closed pass/fail codes, aggregate counts, T0, generation, and named owner.
+9. Create the first allowed operation with kind `RestartStarted` and logical ID `restart/<startup-attempt UUID>/started`; its draft `OccurredUtc` must equal T0 exactly. Append it, resolve its receipt, assert no row/operation occurrence is before T0, and keep both writers and queries disabled. Any mutating producer qualification was completed earlier in an approved qualification partition/environment; production activation uses only non-mutating checks unless separately approved.
+10. While still disabled, reconcile with runbook C and run D1/D2 empty/exact machine/zone/cursor conformance probes.
+11. Only after exact reconciliation and conformance pass, journal/append `RestartCompleted(Succeeded)` and persist its accepted receipt. Then enable writers while queries remain disabled, and only then enable queries. Any failure at or before the accepted completion receipt keeps both disabled. Record only version SHAs, closed pass/fail codes, aggregate counts, T0, generation, and named owner.
 
 Generation-1 `T0` is exactly the captured restart occurrence, never activation transaction wall-clock time; the first restart-start occurs exactly at T0 and no product record may precede it. T0 is never moved backward or silently recreated. A failed transition remains non-ready until an owner-reviewed exact retry or typed rollback.
 
@@ -52,7 +52,7 @@ Run at startup, before first query admission after a dependency interruption, an
    - orphan/inconsistent session links = 0;
    - incomplete/conflicting restart pairs eligible as values = 0;
    - unknown code/version/mapping = 0;
-   - machine/zone/config/source mismatch = 0;
+   - valid machine-ID differences = 0 (`MachineMismatch`, never `SourceGap`); zone/config/source mismatch or missing/corrupt evidence = 0;
    - unresolved receipts = 0.
 8. Compare durable checkpoint `(activation generation, partition version, high-water Event ID, pending/accepted operation set)` to the store. Never use time, filename, sample number, or in-memory state as a checkpoint.
 9. Run a D1 snapshot probe at the activation boundary and verify stable paging/order/cursor binding without logging values.
@@ -68,13 +68,13 @@ Run at startup, before first query admission after a dependency interruption, an
 6. Create/read the current `RestartStarted` operation using logical ID `restart/<startup-attempt UUID>/started`, exact host-captured occurrence, binding, and source; require `OccurredUtc == T0` for generation 1 and `OccurredUtc >= T0` otherwise, then append and journal its accepted receipt.
 7. Wait for UserManagement bridge, approved configuration/alarm mapping, provider, and algorithm warmup; run reconciliation.
 8. Journal/append restart-completed `Succeeded`, or `Failed` with an approved controlled code when persistence is available.
-9. Enable writers, then queries, only after the successful completion receipt and exact reconciliation. On failure remain disabled.
+9. Enable writers while queries remain disabled, then enable queries, only after exact reconciliation/conformance and the successful `RestartCompleted` accepted receipt. On failure remain disabled.
 
 The lifecycle hosted service is the sole restart dispatcher. Repeated callbacks read/retry the same SHR-011D3 operation; they do not create duplicate restart attempts.
 
 ## E. Machine, zone, source, contract, or configuration change runbook
 
-1. On machine or zone mismatch, atomically disable and return `MachineMismatch`/`ZoneInvalid`. On a valid new configuration/source/contract version, disable with `SourceUnavailable/RetryWhenReady` pending owner decision. Persisted interval mismatch is `SourceGap`.
+1. On any syntactically valid machine-ID difference or zone mismatch, atomically disable and return `MachineMismatch`/`ZoneInvalid`. On a valid new configuration/source/contract version, disable with `SourceUnavailable/RetryWhenReady` pending owner decision. Missing/corrupt activation or source evidence is `SourceGap`; machine disagreement never is.
 2. Preserve every record, activation generation, and operation row. Do not rewrite UTC, move records, merge machine partitions, or edit the pointer outside SHR-011D3.
 3. Named release owner records an approval reference and confirms the hardware replacement, rule update, compatible source/contract release, or canonical configuration revision.
 4. Replacement machine: call typed `Initial/MachineReplacement` in the new MachineId partition. Same machine: call typed `Successor` with the closed reason matching the changed field family, `ReplacesActivationId` equal to current, and T0 strictly after the prior T0 and last committed boundary. The transaction supersedes the prior generation and installs the successor. A multi-family compatible release uses only `CompatibleReleaseChanged`.

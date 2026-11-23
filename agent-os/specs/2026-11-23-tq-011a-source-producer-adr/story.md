@@ -17,7 +17,7 @@ Give Equipment, Event, and User reports one authoritative, bounded, disclosure-s
 5. **Identity:** `MachineId` is a versioned SHA-256 controlled identifier derived only after health `Serving` and a subsequent event-applied connected hardware snapshot. The baseline exposes no reconciliation flag. Empty/invalid/change/collision states fail closed; no hardware change is authorized.
 6. **Zone/time:** a deployment-owned `ReportsV1:ReportingZoneId` is resolved at activation and bound to canonical `tq-zone-v1` bytes/hash including all conversion properties. `TimeProvider.GetUtcNow()` supplies UTC instants. Ambient local time is prohibited.
 7. **Visibility:** only committed terminal events, completed restart pairs, valid session states, and committed append-only annotations are query-visible through a D1/D2 immutable snapshot.
-8. **Readiness:** writers start disabled and queries return zero values until D1/D2/D3 publication, machine/zone/clock/storage checks, durable retry recovery, trusted identity/config/alarm inputs, reconciliation, and conformance probes all pass.
+8. **Readiness:** writers start disabled and queries return zero values until D1/D2/D3 publication, machine/zone/clock/storage checks, durable retry recovery, trusted identity/config/alarm inputs, reconciliation, conformance probes, successful `RestartCompleted`, and its accepted receipt all pass. `RestartStarted` alone never enables writers; writers enable before queries.
 
 ## Prioritized follow-on stories
 
@@ -37,7 +37,7 @@ No migration child is authorized or required. A later stakeholder requirement fo
 
 - [field-source-mapping.md](field-source-mapping.md) gives every D1 Equipment/Event/User field one source or one D1-permitted unavailable state.
 - [ADR-TQ-011A.md](ADR-TQ-011A.md) freezes producer/query ownership, history, machine/zone/time, atomicity, cutover, reconciliation, restart, and rollback.
-- [outcomes.md](outcomes.md) gives all fourteen outcomes disjoint typed trigger families and deterministic precedence/retry mappings, explicitly resolving multiple-active versus source corruption and invalid identity while readiness is disabled; every non-ready result contains no canonical values or sensitive/provider details.
+- [outcomes.md](outcomes.md) gives all fourteen outcomes disjoint typed trigger families and deterministic precedence/retry mappings, explicitly resolving every syntactically valid machine-ID difference only to `MachineMismatch`, missing/corrupt activation/source evidence only to `SourceGap`, multiple-active versus source corruption, and invalid identity while readiness is disabled; every non-ready result contains no canonical values or sensitive/provider details.
 - [data-volume-gap-report.md](data-volume-gap-report.md) records the structural evidence, limit fit, zero gap tolerance, and the reason no legacy data is read.
 - [runbooks.md](runbooks.md) and [sequence-diagrams.md](sequence-diagrams.md) freeze normal flow, storage-first startup, cutover, restart, configuration reactivation, reconciliation, and rollback.
 - [implementation-handoff.md](implementation-handoff.md) freezes the TQ-011B base, branch/worktree, owned/protected paths, tests, builds, readiness disablement, gitlink rollback, and release rollback owner requirement.

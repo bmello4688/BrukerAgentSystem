@@ -74,21 +74,22 @@ sequenceDiagram
         H->>C: journal RestartStarted restart/UUID/started at OccurredUtc=T0
         H->>R: append restart-start at exactly T0
         H->>C: accept restart-start receipt
-        H->>G: WritersEnabled, QueriesDisabled
-        H->>R: deterministic producer/reconciliation probes
+        H->>G: remain Disabled after RestartStarted
+        H->>R: deterministic reconciliation probes
         H->>D2: D1 conformance query probes
         alt exact reconciliation and probes pass
             H->>C: journal restart-completion intent
             H->>R: append successful restart completion
             H->>C: accept completion receipt
-            H->>G: Ready
+            H->>G: WritersEnabledQueriesDisabled
+            H->>G: Ready (queries enabled)
         else mismatch/gap/unknown
             H->>G: Disabled
         end
     end
 ```
 
-There is no stage in which queries are enabled before compatible writers or in which legacy data is consulted. The initial-empty transaction and first-operation gate prove that no control operation or FDRS record has `OccurredUtc < T0`.
+There is no stage in which `RestartStarted` alone enables writers, queries are enabled before compatible writers, or legacy data is consulted. Reconciliation, conformance, and a successful `RestartCompleted` accepted receipt all precede writer enablement; query enablement follows writer enablement. The initial-empty transaction and first-operation gate prove that no control operation or FDRS record has `OccurredUtc < T0`.
 
 ## 3. Ambiguous acceptance and process restart
 
@@ -206,13 +207,14 @@ sequenceDiagram
     L->>C: journal RestartStarted with closed kind/phase and exact CBE fingerprint
     L->>R: append restart-start (generation 1: OccurredUtc = T0)
     L->>D: await session/config/alarm/provider + algorithm warmup
-    L->>L: reconcile and run conformance probes
-    L->>C: journal restart completion
-    L->>R: append completion; persist receipt
-    L->>G: WritersEnabledQueriesDisabled, then Ready
+    L->>L: reconcile and run conformance probes while Disabled
+    L->>C: journal successful RestartCompleted
+    L->>R: append RestartCompleted; persist accepted receipt
+    L->>G: WritersEnabledQueriesDisabled
+    L->>G: Ready (queries enabled)
 ```
 
-No FDRS draft is constructed before storage initialization, authoritative source construction, trusted occurrence capture, machine observation, and activation binding. On initial cutover, activation commits the previously captured occurrence as T0 and the first draft uses that same value; no pre-T0 record is possible. No later new draft is admitted before pending-operation and sample/session recovery.
+No FDRS draft is constructed before storage initialization, authoritative source construction, trusted occurrence capture, machine observation, and activation binding. On initial cutover, activation commits the previously captured occurrence as T0 and the first draft uses that same value; no pre-T0 record is possible. No later new draft is admitted before pending-operation and sample/session recovery. `RestartStarted` never enables writers: reconciliation, conformance, and the successful `RestartCompleted` accepted receipt must finish first; writers then queries are enabled in separate ordered transitions.
 
 ## 6. Rollback decision
 

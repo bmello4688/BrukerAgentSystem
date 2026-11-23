@@ -49,7 +49,7 @@ Tolerance is exactly zero for report-visible native FDRS facts:
 - zero unresolved ambiguous write receipts when readiness is enabled;
 - zero pending SHR-011D3 operation rows when readiness is enabled;
 - zero operation or record occurrence before generation-1 T0, and restart start occurrence exactly equal to generation-1 T0;
-- zero cross-machine records or machine/zone/source/config mismatch against the activation interval containing each occurrence.
+- zero syntactically valid cross-machine record/activation claims (each maps only to `MachineMismatch`), zero current zone-rule mismatches (`ZoneInvalid`), and zero missing/corrupt stored activation/source/zone/config evidence against the interval containing each occurrence (`SourceGap`).
 
 Retention must not silently turn a requested range into a successful partial page. If D2 cannot prove the requested complete snapshot because required source records were retained/evicted, map its integrity/unavailability result to `SourceGap`/`HistoryUnavailable` according to the published reason; never synthesize zero counts.
 
@@ -69,6 +69,6 @@ No raw distribution was available to this planning work. Before enabling a produ
 
 ## Verification datasets for TQ-011B
 
-Use synthetic controlled identifiers and annotations only. Tests must cover: empty; 1; page boundary 500/501; row 9,999/10,000/10,001; work 19,999/20,000/20,001; four/five leases; exact 5-minute expiry with `RestartQuery`; 30-second timeout; date 3,660/3,661; annotation 512/513 FDRS scalars; identifier 128/129; cursor 512/513 bytes; duplicate ID; skipped ID; duplicate terminal; orphan session; incomplete restart; unknown code; machine/zone mismatch; activation interval/config change; activation generation 1,024/1,025; pending operation 500/501; cancellation at each intent/repository/receipt/publication boundary.
+Use synthetic controlled identifiers and annotations only. Tests must cover: empty; 1; page boundary 500/501; row 9,999/10,000/10,001; work 19,999/20,000/20,001; four/five leases; exact 5-minute expiry with `RestartQuery`; 30-second timeout; date 3,660/3,661; annotation 512/513 FDRS scalars; identifier 128/129; cursor 512/513 bytes; duplicate ID; skipped ID; duplicate terminal; orphan session; incomplete restart; unknown code; valid machine difference independently in request, hardware observation, stored record, and activation; zone mismatch; missing/corrupt activation/source evidence; activation interval/config change; activation generation 1,024/1,025; pending operation 500/501; cancellation at each intent/repository/receipt/publication boundary.
 
 The expected result is complete `Ready` only at or within each accepted bound. Every exceeding/integrity case is the specified zero-value outcome.
