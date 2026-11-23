@@ -30,14 +30,26 @@ The provider is singleton; codecs/profile registry are immutable and stateless; 
 | Collection | Key / population | Required stored fields and indexes |
 |---|---|---|
 | `fdrs_report_source_activations_v1` | ActivationId; max 1,024 | exact D3a ActivationBinding fields; indexes `generation(generation)`, `state(state,generation)`, `t0(activatedUtc,generation)` |
-| `fdrs_report_source_activation_state_v1` | singleton `state`; exactly 0 or 1 | ContractVersion, MachineId, CurrentActivationId, CurrentGeneration, ActivationHistoryFingerprint, LastOccurrenceUtc, PartitionVersion; index `singleton(documentId)` |
-| `fdrs_producer_operations_v1` | OperationId; max 100,000 | immutable operation header plus current State/AttemptOrdinal and exact receipt shape; indexes `state-operation(state,operationId)`, `occurrence(occurredUtc,operationId)`, `correlation(internalCorrelation)` |
-| `fdrs_producer_operation_attempts_v1` | `<OperationId>/<AttemptOrdinal>`; max 32 per operation | ContractVersion, OperationId, AttemptOrdinal, State, StartedUtc, ResolvedUtc?, rejection/receipt proof fields, PartitionVersion; index `operation-attempt(operationId,attemptOrdinal)` |
-| `fdrs_report_source_query_leases_v1` | LeaseId; max 10,000 | exact D3a QueryLease fields; indexes `state-expiry(state,expiresUtc,leaseId)`, `snapshot(snapshotId)`, `history(activationHistoryFingerprint)` |
+| `fdrs_report_source_activation_state_v1` | singleton `state`; exactly 0 or 1 | ContractVersion, MachineId, CurrentActivationId, CurrentGeneration, ActivationHistoryFingerprint, LastOccurrenceUtc, CurrentOperationEpoch, CurrentLeaseEpoch, PartitionVersion; index `singleton(documentId)` |
+| `fdrs_report_source_partition_transactions_v1` | PartitionVersion; append-only | ContractVersion, MachineId, PartitionVersion, MutationKind, MutationFingerprint, CommittedUtc; index `version(partitionVersion)` |
+| `fdrs_report_source_storage_epochs_v1` | `<kind>/<epoch>`; append-only | ContractVersion, MachineId, EpochKind, Epoch, State, RowCount, FirstPartitionVersion, LastPartitionVersion, PreviousEpochHash, EpochHash?, ClosedUtc?, PartitionVersion; indexes `kind-epoch(epochKind,epoch)`, `state(state,epochKind)` |
+| `fdrs_producer_operations_v1` | `<epoch>/<OperationId>`; max 100,000 per epoch | immutable operation header plus StorageEpoch, current State/AttemptOrdinal and exact receipt shape; indexes `epoch-state-operation(storageEpoch,state,operationId)`, `occurrence(occurredUtc,operationId)`, `correlation(internalCorrelation)` |
+| `fdrs_producer_operation_attempts_v1` | `<OperationId>/<AttemptOrdinal>`; max 32 per operation | ContractVersion, MachineId, StorageEpoch, OperationId, AttemptOrdinal, State, StartedUtc, ResolvedUtc?, AcceptedRecordId?, AcceptedSampleEventId?, RepositoryReceiptId?, AcceptanceProofFingerprint?, PermanentRejectionCode?, NotAcceptedDisposition?, PartitionVersion; index `operation-attempt(operationId,attemptOrdinal)` |
+| `fdrs_report_source_query_leases_v1` | `<epoch>/<LeaseId>`; max 10,000 per epoch | StorageEpoch plus exact D3a QueryLease fields; indexes `epoch-state-expiry(storageEpoch,state,expiresUtc,leaseId)`, `snapshot(snapshotId)`, `history(activationHistoryFingerprint)` |
+
+For each row, the fields above are the canonical stored order; named index descriptions are not serialized fields. Epoch Open/Closed and all inherited activation/operation/lease nullability rules are exactly the D3a matrices. The transaction-ledger mutation set is ordered by collection ordinal then key ordinal before hashing. Unknown members are rejected.
 
 Every stored document repeats ContractVersion=`1`, schema version=`1`, partition MachineId, and PartitionVersion. Strict deserialization occurs before business classification. Unknown/missing/extra property, enum number/token/case, future version, malformed identifier/time, illegal null, or contradictory receipt returns `Unsupported / UnsupportedVersion / DoNotRetry`, null value, zero writes, and downstream `UnknownMapping / ContactSupport`.
 
 `InitializeAsync` first validates store capabilities, then ensures the exact composed schema. Repeating exact version 1 is idempotent. Missing existing collection/index, version drift, unknown future version, partial initialization, or attempted upgrade is `UnsupportedVersion`; it never creates a best-effort subset. Success `true` means only schema/capability compatibility, never product readiness.
+
+### Monotonic PartitionVersion allocator and ledger
+
+The pointer owns `CurrentPartitionVersion`. With no machine documents it is logically `0`. Every mutating partition transaction computes `next = checked(current + 1)` exactly once, stamps `next` on every inserted/replaced D3 document, and appends one `fdrs_report_source_partition_transactions_v1` row containing the mutation kind and canonical hash of the sorted `(collection,key,post-write-fingerprint)` set. It then writes the pointer with the same `next`. The first mutation is version 1. Multi-document activation, attempt resolution, lease expiry/release, and epoch rollover each consume one version, not one per document.
+
+Read-only calls, failed validation, cancellation before admission, proven-absent writes, and rolled-back transactions do not allocate. Exact idempotent retry finds and returns the committed ledger row/version without increment. After ambiguous commit, resolution reads the deterministic identity and ledger with no caller token; proven commit returns that version, proven absence preserves current, and unresolved returns AcceptanceUnconfirmed without allocation. At `Int64.MaxValue`, any mutation returns LimitExceeded/DoNotRetry with zero writes.
+
+Every read reconstructs integrity from retained ledger/documents: versions are positive and no greater than pointer; all documents stamped at a version match that version's canonical mutation set; object replacements increase; activation generations/attempt ordinals/epochs never regress; pointer equals the maximum ledger version; ledger versions are contiguous 1..current. Gap, mixed stamps, unledgered document, incompatible duplicate, or pointer mismatch records IntegrityFailure. Provider tests cover empty/1/2/MaxValue, multi-document same stamp, concurrent allocation, idempotent retry, read/failure no increment, ambiguous resolution, overflow, and every reconstruction fault.
 
 ## Atomic cross-collection transaction boundary
 
@@ -53,12 +65,12 @@ The transaction proves history, identity, compatibility, quiescence, and bounds 
 
 Before D2 exists, the lease collection is initialized and empty. Empty proves only “zero live leases”; it does not enable queries or writers. Only `AcquireQueryLeaseAsync` may insert a lease, and only D2 may call it in runtime composition. Activation never fabricates or clears a lease.
 
-## Executable quiescence predicate
+## Executable whole-set quiescence predicate
 
-The provider evaluates predicates in this exact order and returns the first failure:
+The transaction reads the complete bounded evidence set first, validates every decodable document, and records every applicable `QuiescenceTriggerV1` in a duplicate-free set. It never returns from the first failed predicate and never lets query/enumeration order choose the result. If a document cannot be strictly decoded, `UnsupportedVersion` is recorded and remaining independently decodable evidence is still evaluated without using fields from the bad document. After whole-set evaluation, exactly one outcome is selected by the single precedence table below.
 
-1. **Version/integrity:** every read document is strict version 1, canonical, and cross-linked. Failure is UnsupportedVersion first, otherwise IntegrityFailure.
-2. **Identity:** request machine, pointer, activation, FDRS state/rows, operations, and leases are equal ordinal controlled values. Valid unequal machine claim is IdentityConflict; missing/corrupt evidence is IntegrityFailure.
+1. **Version/syntax:** every read document is strict version 1 and canonical. Unknown/malformed version, token, case, rejection code, or member shape records UnsupportedVersion; a decodable but broken cross-link records IntegrityFailure. Selection occurs only after the complete fact set is built.
+2. **Machine:** after syntax/version validation, compare every request, partition, pointer, activation, FDRS row, operation, and lease MachineId to the expected binding. Any syntactically valid unequal value records `ValidMachineDifference`; it maps only to `MachineMismatch / ContactSupport` and is evaluated before identity/integrity. Missing/malformed machine is UnsupportedVersion; only equal-machine duplicate/conflicting claims can record IdentityConflict.
 3. **Lease:** after persisting elapsed `Active -> Expired`, zero `Active` lease may have `ExpiresUtc > now`. Any is LeaseConflict. Released/Expired are resolved and retained.
 4. **Event:** `fdrs_machine_state_v1.ActiveEventId` is null and `fdrs_sample_events_v1` contains zero nonterminal aggregate. Exactly one consistent open aggregate means not quiescent; multiple/pointer disagreement means integrity failure.
 5. **Sessions:** query `fdrs_records_v1` by the exact `session-started`, `session-access-decision`, and `session-ended` payload kinds and group by canonical attempt correlation, then stable SessionId after a granted decision. `Started + granted + Ended` with valid linkage is Completed; `Started + denied` with no SessionId/end is Denied; `Started + granted` without Ended is Open; missing decision, duplicate/conflicting decision/end, denied-plus-end, broken attempt/SessionId linkage, or an Ended without its start is Incomplete. Any group whose `[StartUtc, EndUtc)` or open `[StartUtc, proposed T0)` intersects `[current T0, proposed T0)` participates. Completed and Denied are resolved; Open is not quiescent; Incomplete is integrity failure. No end time or SessionId is fabricated.
@@ -68,13 +80,29 @@ The provider evaluates predicates in this exact order and returns the first fail
 9. **Compatibility:** target has exact MachineId, ProducerProfileId/version, ControlContractVersion, WriterContractVersion, QueryContractVersion, partition/schema version, and canonical history. A reason permits only its closed field delta: ZoneRulesChanged=zone ID/fingerprint/version; SourceReleaseChanged=source component/version; ContractReleaseChanged=writer/query/query-provider versions; ConfigurationChanged=configuration revision; CompatibleReleaseChanged=two or more of those families, while machine/profile/control/schema remain equal. MachineReplacement is Initial only. Any unapproved delta is IdentityConflict; unknown version is UnsupportedVersion.
 10. **Rollback zero-write:** current interval contains zero Accepted operation, zero FDRS record/import/receipt, and only resolved ProvenNotAccepted operations; target satisfies compatibility. Otherwise TransitionNotQuiescent. History is never deleted or rewritten.
 
-Precedence is UnsupportedVersion -> IntegrityFailure -> IdentityConflict -> LeaseConflict -> StorageUnavailable/AcceptanceUnconfirmed -> TransitionNotQuiescent -> success. Cancellation can preempt as specified below but never masks a possible commit.
+The only precedence is:
+
+```text
+UnsupportedVersion
+  -> ValidMachineDifference / MachineMismatch
+  -> IntegrityFailure (including incomplete session/source evidence)
+  -> IdentityConflict (equal-machine duplicate/conflicting claims only)
+  -> LeaseConflict
+  -> AcceptanceUnconfirmed or StorageUnavailable
+  -> ActiveEvent or OpenSession or PendingOperation or BoundaryConflict
+  -> IncompatibleTarget or RollbackHasWrites
+  -> success
+```
+
+The selected trigger maps through the D3a closed result table; non-selected triggers are retained only as aggregate test evidence and are never logged with protected values. Cancellation is handled by the separate transaction rules below and is not a competing quiescence trigger; it never masks a possible commit. Exhaustive pairwise and representative multi-trigger tests prove the same selected result regardless of collection order, provider order, or simultaneous facts; in particular valid unequal machine wins over corrupt source and equal-machine collision, while UnsupportedVersion wins when syntax/version cannot establish a valid machine claim.
 
 ## Receipt and proven-not-accepted provider semantics
 
 Create inserts immutable operation header plus Pending attempt 1 in one transaction. Exact create/retry reads existing state. Same OperationId/InternalCorrelation with any different canonical field is IdentityConflict. Resolve with Accepted validates the registered profile receipt shape, appends immutable attempt resolution, and updates only the header projection. Resolve with ProvenNotAccepted requires store proof described above plus a controlled profile rejection code/disposition.
 
-`RetryProvenNotAcceptedAsync` is legal only for `RetrySameIdentity`, attempt <32, no other Pending attempt, exact same operation/correlation/logical ID/draft fingerprint, and profile still accepts the rejection as retryable. It appends attempt+1 and changes the header projection to Pending. It never deletes old evidence or allocates another ID. `AbortActivation` and Accepted cannot reopen. A permanent repository rejection maps to AbortActivation; current activation remains disabled, but the resolved row no longer creates an “unresolved receipt” deadlock and an approved successor/zero-write rollback can recover.
+`RetryProvenNotAcceptedAsync` is legal only for `RetrySameIdentity`, attempt <32, no other Pending attempt, exact same operation/correlation/logical ID/draft fingerprint, and profile still accepts the rejection as retryable. It appends attempt+1 and changes the header projection to Pending. It never deletes old evidence or allocates another ID. If attempt 32 is conclusively not accepted with a retryable disposition, the same resolution transaction writes `ProvenNotAccepted / AbortActivation / retry-exhausted-v1`; all 32 attempts remain immutable and the header becomes terminal. It cannot remain RetrySameIdentity, Pending, or acceptance-unconfirmed. `AbortActivation` and Accepted cannot reopen. A recognized permanent repository rejection uses the same sole controlled code and AbortActivation. Current activation remains disabled, but the resolved row no longer creates an unresolved-receipt deadlock and an approved successor/zero-write rollback can recover.
+
+`retry-exhausted-v1` is the only recognized stored rejection token. Any absent, future, provider-supplied, alternate-case, or malformed rejection code is `Unsupported / UnsupportedVersion / DoNotRetry`, null value, zero writes; it is never silently converted to AbortActivation. Tests cover attempts 31->32, attempt-32 exhaustion terminalization, exact retry of the terminal resolution, forbidden attempt 33, unknown codes on requests and stored rows, and recovery through successor/zero-write rollback without deleting evidence.
 
 For the nine TQ profile operations, the provider enforces the D3a receipt table exactly. In addition: RepositoryReceiptId is controlled 1..128 ASCII; AcceptedRecordId is canonical lowercase UUID; AcceptedSampleEventId is positive Int64; proof fingerprint is exact SHA-256. Pending has none; Accepted has only required accepted fields; ProvenNotAccepted has only rejection fields. Any contradiction in storage is UnsupportedVersion, not repair.
 
@@ -83,6 +111,16 @@ For the nine TQ profile operations, the provider enforces the D3a receipt table 
 Every history read transaction verifies complete generations 1..N, one current Active last row, legal predecessor closure, T0/ClosedUtc half-open intervals, pointer equality, immutable fingerprints, partition versions, and the D3a canonical history hash. Zero rows is legal only with no pointer/FDRS/control evidence. 1,025 is LimitExceeded, never truncation.
 
 Lease acquire transaction verifies current complete history fingerprint, current Active generation, unique LeaseId/SnapshotId/InternalCorrelation, fewer than four live leases, no activation transaction in progress (enforced by same partition serialization), and requested expiry exactly now+5 minutes. Exact retry is idempotent; cross-binding is IdentityConflict. Release requires exact binding and atomically records ReleasedUtc. Expiry records TimeProvider now and is idempotent. Transition and acquire serialize through the same partition; therefore no lease can appear between the transition's lease proof and commit.
+
+## Non-destructive lifetime capacity and epoch hash chain
+
+The 100,000-operation and 10,000-lease limits are per active storage epoch, not lifetime limits. Normal resolved volume must not permanently disable reporting.
+
+- Epoch 1 is created with the first row of its kind. At exactly 100,000 operations, the next new operation atomically closes the epoch and opens operation epoch+1 only if every operation is Accepted or terminal ProvenNotAccepted and no ambiguous/Pending attempt exists. At exactly 10,000 leases, the next acquire first terminalizes elapsed leases and may close/open the lease epoch only when zero Active lease remains.
+- Closing computes CBE-v1 `SHA256(ASCII("report-source-control-epoch-v1") || 00 || F(EpochKind) || F(Epoch) || F(RowCount) || F(FirstPartitionVersion) || F(LastPartitionVersion) || F(PreviousEpochHash?) || F(list))`; list entries are ID text, terminal-state enum, canonical-fingerprint text, and PartitionVersion integer, ordered by ID ordinal. Rows remain in their original collections and are never deleted, moved, rewritten, or truncated. The new immutable epoch row stores the prior hash; the pointer selects the new active epoch.
+- Historical reads/reconstruction verify the complete epoch hash chain and may query older rows by epoch. Runtime pending/active reads inspect current epoch plus any older epoch whose immutable summary says unresolved count nonzero; a closed epoch must record zero unresolved count. A hash mismatch is IntegrityFailure.
+- If capacity is reached while unresolved work/live leases exist, the new write returns TransitionNotQuiescent/DoNotRetry with zero writes; resolving/releasing the existing rows permits rollover. If epoch is `Int32.MaxValue`, rollover is LimitExceeded/DoNotRetry. Neither case deletes evidence or invents IDs.
+- Boundaries are exact: operation 99,999 and 100,000 remain epoch N; 100,001 opens epoch N+1. Lease 9,999 and 10,000 remain epoch N; 10,001 opens N+1 only after zero live leases. D3b commits independently generated empty, one-row, 100,000-operation, and 10,000-lease CBE/hash vectors. Tests cover those vectors, rollover atomicity/crash/lost acknowledgment, unresolved blocker then recovery, retained-row hashes, chain tamper/gap/replay, epoch overflow, and years of repeated rollover without readiness loss.
 
 ## Runtime, time, cancellation, and ambiguous commit
 
@@ -114,6 +152,6 @@ git diff --check
 git status --short --branch
 ```
 
-Tests execute both LiteDB and MongoDB contract fixtures for schema idempotency/version rejection, every atomic predicate/precedence, all 9 receipt shapes, Pending/Accepted/ProvenNotAccepted/retry, 1/32/33 attempts, 4/5 leases, expiry/release races, 1,024/1,025 history, population/scalar strict deserialization, exact history hashes, cancellation/ambiguous commits, and disclosure-safe diagnostics/logging.
+Tests execute both LiteDB and MongoDB contract fixtures for schema idempotency/version rejection; whole-set quiescence and precedence permutations; MachineMismatch before identity/integrity; all 9 receipt shapes; Pending/Accepted/ProvenNotAccepted/retry/exhaustion; 1/32/33 attempts; exhaustive activation/binding/lease nullability; 4/5 live leases; expiry/release races; 1,024/1,025 history; exact DTO field order and unknown members; scalar/UTF-8/population N/N+1; PartitionVersion allocation/ledger/reconstruction/overflow; 100,000/100,001 operation and 10,000/10,001 lease epoch rollover/hash chains; exact history hashes; cancellation/ambiguous commits; and disclosure-safe diagnostics/logging.
 
 Publication requires independent review and exact live SHA. Before any runtime data exists, rollback reverts only D3b-owned additive files and the mechanical schema extraction. After a D3 row exists, no schema/data rollback is allowed: restore the last compatible accepted binary or publish a compatible roll-forward. No collection deletion, repair, state reset, T0 edit, or private maintenance command.

@@ -42,7 +42,9 @@ Feature Engineering owns D3a, D3b, and D3c implementation. Reviewer Integration 
 
 - Activation history is complete, generation-ascending, contiguous, bounded at 1,024, canonical-hashed, and bound into every D2 snapshot/cursor.
 - Quiescence is a closed predicate over exact FDRS collections, control rows, and leases; prose such as “compatible” or “no active work” is not executable authority.
+- Quiescence evaluates the complete bounded fact set and applies one precedence; valid unequal machine is a first-class core outcome before equal-machine collision or integrity classification.
 - Every public/stored scalar, list, timestamp, version, enum, nullable field, and collection has construction and strict-deserialization N/N+1 tests.
+- One monotonic per-machine PartitionVersion ledger stamps each atomic mutation. Non-destructive hash-linked storage epochs retain all operation/lease evidence while preventing normal lifetime volume from exhausting the active epoch.
 - All public records/results use disclosure-safe `ToString()` and logging projections. Operator-safe support correlation is distinct from the internal deterministic operation correlation.
 - Runtime composition is singleton store/provider/profile registry, stateless codecs, injected `TimeProvider`, and one per-machine transactional concurrency owner. No ambient identity, clock, cache, mutex, or current-user state is permitted.
 

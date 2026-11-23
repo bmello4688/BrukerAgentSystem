@@ -74,13 +74,31 @@ OperationState: Pending=1, Accepted=2, ProvenNotAccepted=3
 OperationResolution: Accepted=1, ProvenNotAccepted=2
 NotAcceptedDisposition: RetrySameIdentity=1, AbortActivation=2
 LeaseState: Active=1, Released=2, Expired=3
+StorageEpochState: Open=1, Closed=2
 Status: Success=1, Unavailable=2, Canceled=3, Rejected=4, IntegrityBlocked=5,
   Unsupported=6, LimitExceeded=7
 Reason: None=0, StorageUnavailable=1, AcceptanceUnconfirmed=2, OperationCanceled=3,
   InitialStateNotEmpty=4, IdentityConflict=5, IntegrityFailure=6,
   UnsupportedVersion=7, LimitExceeded=8, TransitionNotQuiescent=9,
-  LeaseConflict=10, PermanentRejection=11
+  LeaseConflict=10, PermanentRejection=11, MachineMismatch=12
 Retry: None=0, RetryWhenReady=1, RestartQuery=2, DoNotRetry=3
+PermanentRejectionCode: RetryExhausted=1 (wire `retry-exhausted-v1`)
+QuiescenceTrigger: UnsupportedVersion=1, ValidMachineDifference=2,
+  IntegrityFailure=3, IdentityConflict=4, LeaseConflict=5,
+  AcceptanceUnconfirmed=6, ActiveEvent=7, OpenSession=8,
+  IncompleteSession=9, PendingOperation=10, BoundaryConflict=11,
+  IncompatibleTarget=12, RollbackHasWrites=13
+MethodCode: Initialize=1, ReadCurrentActivation=2, ReadActivationHistory=3,
+  TransitionActivation=4, CreateOrReadOperation=5, ResolveOperation=6,
+  RetryProvenNotAccepted=7, ReadPendingOperations=8, AcquireQueryLease=9,
+  ReleaseQueryLease=10, ReadQueryLeases=11
+ReceiptFieldRule: Forbidden=1, Required=2
+ProfileValidationFailure: UnknownOperationKind=1, InvalidLogicalId=2,
+  InvalidActivationBinding=3, InvalidReceiptShape=4, InvalidRetryPolicy=5
+StorageEpochKind: Operation=1, QueryLease=2
+ControlMutationKind: ActivationTransition=1, OperationCreated=2,
+  OperationResolved=3, OperationRetried=4, LeaseAcquired=5,
+  LeaseReleased=6, LeaseExpired=7, EpochRolled=8
 ```
 
 Unknown numbers/tokens/case and undefined combinations are invalid at construction and strict deserialization.
@@ -118,11 +136,93 @@ QueryLease:
   State, PartitionVersion, InternalCorrelation, SupportCorrelation
 ```
 
+Every other public DTO has this exact field order and nullability; there are no extension bags or optional unknown members:
+
+```text
+ActivationHistory:
+  ContractVersion, MachineId, Rows(non-null 0..1024),
+  ActivationHistoryFingerprint, PartitionVersion, SupportCorrelation
+CreateProducerOperation:
+  ContractVersion, MachineId, ActivationId, ProducerProfileId,
+  ProducerProfileVersion, OperationId, OperationKindCode,
+  LogicalOperationId, InternalCorrelation, SupportCorrelation,
+  DraftFingerprint, OccurredUtc
+ResolveProducerOperation:
+  ContractVersion, MachineId, ActivationId, OperationId,
+  InternalCorrelation, SupportCorrelation, DraftFingerprint, Resolution,
+  AcceptedRecordId?, AcceptedSampleEventId?, RepositoryReceiptId?,
+  AcceptanceProofFingerprint?, PermanentRejectionCode?,
+  NotAcceptedDisposition?, ResolvedUtc
+RetryProducerOperation:
+  ContractVersion, MachineId, ActivationId, OperationId,
+  InternalCorrelation, SupportCorrelation, DraftFingerprint,
+  ExpectedAttemptOrdinal, RetriedUtc
+ReadPendingOperations:
+  ContractVersion, MachineId, Limit, AfterOperationId?, SupportCorrelation
+ProducerOperationPage:
+  ContractVersion, MachineId, Items(non-null 0..500), NextOperationId?,
+  PartitionVersion, SupportCorrelation
+AcquireQueryLease:
+  ContractVersion, LeaseId, MachineId, SnapshotId, OwnerId,
+  ActivationHistoryFingerprint, InternalCorrelation, SupportCorrelation
+ReleaseQueryLease:
+  ContractVersion, LeaseId, MachineId, SnapshotId,
+  ActivationHistoryFingerprint, InternalCorrelation, SupportCorrelation
+ReadQueryLeases:
+  ContractVersion, MachineId, Limit, AfterLeaseId?, IncludeTerminal,
+  SupportCorrelation
+QueryLeasePage:
+  ContractVersion, MachineId, Items(non-null 0..500), NextLeaseId?,
+  PartitionVersion, SupportCorrelation
+ProfileValidation:
+  ContractVersion, IsValid, FailureReason, SupportCorrelation
+ReceiptShape:
+  ContractVersion, OperationKindCode, RecordIdRule, SampleEventIdRule,
+  RepositoryReceiptRule, AcceptanceProofRule
+RetryPolicy:
+  ContractVersion, OperationKindCode, PermanentRejectionCode,
+  NotAcceptedDisposition
+ControlResult<T>:
+  ContractVersion, MethodCode, Status, Reason, Retry, Value?, SupportCorrelation
+```
+
+Page continuation is null exactly when `Items.Count < Limit`; otherwise it equals the last canonical ID and requires a later-page request to use it exactly. Empty page has null continuation. `ActivationHistory.PartitionVersion` is zero only for the successful empty-store read; every other public/stored partition version is positive. Profile validation `FailureReason` is null iff valid and otherwise is one closed non-sensitive reason. `IncludeTerminal=false` is mandatory for the D2 pending/active runtime read; diagnostic terminal reads are internal test/support APIs, never product calls.
+
+### Exhaustive activation/binding/lease nullability and state matrices
+
+| Activation mode | StartupAttemptId | RestartOccurredUtc | ReplacesActivationId | RollbackTargetActivationId |
+|---|---|---|---|---|
+| `Initial` | required UUID | required and exactly `ActivatedUtc` | null | null |
+| `Successor` | null | null | required current Active ID | null |
+| `Rollback` | null | null | required current Active ID | required earlier compatible ID, distinct from current |
+
+| Binding state | ClosedUtc | Required relationship |
+|---|---|---|
+| `Active` | null | it is the pointer/current last generation |
+| `Superseded` | required | equals immediate successor T0 |
+| `RolledBack` | required | equals immediate rollback generation T0 |
+
+| Lease state | ReleasedUtc | Required relationship |
+|---|---|---|
+| `Active` | null | `AcquiredUtc < ExpiresUtc`, now is earlier than expiry |
+| `Released` | required | `AcquiredUtc <= ReleasedUtc <= ExpiresUtc` |
+| `Expired` | required | terminalization time is at or after `ExpiresUtc` |
+
+Every unlisted combination is impossible at public construction and strict deserialization. D3a conformance exhaustively crosses all mode/state/null permutations for `StartupAttemptId`, `RestartOccurredUtc`, `ReplacesActivationId`, `RollbackTargetActivationId`, `ClosedUtc`, and `ReleasedUtc`; it also tests exact equality/ordering boundaries and unknown JSON members.
+
+Stored epoch nullability is equally closed: Open requires `EpochHash=null` and `ClosedUtc=null`; Closed requires both values. `PreviousEpochHash` is null exactly for epoch 1 and required thereafter. StorageEpoch on operation/lease rows is always positive and must reference one existing epoch of the matching kind. Construction, strict deserialization, and reconstruction tests exhaust those combinations.
+
+### PartitionVersion contract
+
+`PartitionVersion` is signed Int64 with `0` reserved only for the successful completely empty read. The first machine-partition mutation commits version `1`; each later committed mutating transaction allocates exactly `checked(current + 1)`. Every document inserted or replaced by that one transaction, including pointer, activation, operation header/attempt, lease terminalization, and epoch row, carries the same allocated value. Read-only calls, canceled/failed transactions, strict-deserialization failures, and proven-absent writes do not allocate. Exact idempotent retry returns the already committed value without increment. Ambiguous-commit resolution returns the discovered committed value or AcceptanceUnconfirmed; it never speculates a next value. `Int64.MaxValue` cannot increment and yields `LimitExceeded / DoNotRetry`, null value, zero writes.
+
+Reconstruction reads all retained D3 rows and requires: positive versions; no value above pointer version; each version's documents form one legal mutation shape; per-object versions strictly increase across replacements; activation generations and operation attempts never move backward; the pointer equals the maximum committed version; and every version from 1 through the maximum is represented by the pointer's append-only transaction ledger. Gap, duplicate incompatible mutation, mixed stamping, or pointer disagreement is IntegrityFailure. D3a conformance covers empty/1/2/MaxValue, same-version multi-document stamping, retry-no-increment, read/failure-no-increment, overflow, and reconstruction corruption.
+
 Collections in public values are immutable defensive copies and structural equality is required. Default `ToString()` for every record/result prints only type, status/reason/retry, count, and support correlation. It must never print machine, activation, profile binding, operation, lease, snapshot, owner, approval, internal correlation, receipt, fingerprint, source/provider/store, exception, or caller input.
 
 ## Closed result tuples and method-specific success
 
-`ReportSourceControlResultV1<T>` fields are exactly `Status`, `Reason`, `Retry`, `Value`, `SupportCorrelation`. Factories are internal; the public constructor validates the matrix.
+`ReportSourceControlResultV1<T>` fields are exactly `Status`, `Reason`, `Retry`, `Value`, `SupportCorrelation`. Its constructor is non-public. Each API method has internal method-specific factories that validate its exact success shape and the closed failure matrix before a result can exist. Generic `Success(default)` is impossible: only `ReadCurrentActivationAsync` may create a successful null activation, and only after proving pointer/history/control emptiness; transition, operation, lease, initialization, history, and page success factories require their exact non-null value type. Strict deserialization uses the same method discriminator and factories, so a null transition success cannot enter through the wire.
 
 | Status | Legal reason | Retry | Value |
 |---|---|---|---|
@@ -130,13 +230,14 @@ Collections in public values are immutable defensive copies and structural equal
 | `Unavailable` | `StorageUnavailable`, `AcceptanceUnconfirmed` | `RetryWhenReady` | null |
 | `Canceled` | `OperationCanceled` | `None` | null |
 | `Rejected` | `InitialStateNotEmpty`, `IdentityConflict`, `PermanentRejection` | `DoNotRetry` | null |
+| `Rejected` | `MachineMismatch` | `DoNotRetry` | null |
 | `IntegrityBlocked` | `IntegrityFailure`, `TransitionNotQuiescent`, `LeaseConflict` | `DoNotRetry` | null |
 | `Unsupported` | `UnsupportedVersion` | `DoNotRetry` | null |
 | `LimitExceeded` | `LimitExceeded` | `DoNotRetry` | null |
 
 No wildcard tuple exists. Method successes are exact: initialize=`true`; current activation=one binding or null only when both pointer and history are empty; history=non-null 0..1,024 list plus fingerprint; transition=one non-null binding; create/resolve/retry=one non-null operation; pending read=non-null 0..500 page; acquire/release=one non-null lease; lease read=non-null 0..500 page. A successful `ResolveOperationAsync(ProvenNotAccepted)` returns the controlled operation in `ProvenNotAccepted` state; `PermanentRejection` result failure is reserved for an illegal retry/operation request against a terminal AbortActivation row. `false`, null where not explicitly allowed, or an empty list does not mean Ready. Every failure has null value and zero payload bytes outside controlled status fields.
 
-Downstream mapping is closed: storage/acceptance -> `SourceUnavailable / RetryWhenReady`; canceled -> `Canceled / None`; initial-not-empty -> `MigrationIncomplete / ContactSupport`; identity -> `IdentityCollision / ContactSupport`; integrity/quiescence/lease -> `SourceGap / ContactSupport`; unsupported -> `UnknownMapping / ContactSupport`; limit -> `LimitExceeded / ContactSupport`; permanent rejection -> `SourceGap / ContactSupport`. Invalid caller input is replaced by a newly generated safe `SupportCorrelationV1`; it is never reflected.
+Downstream mapping is closed: storage/acceptance -> `SourceUnavailable / RetryWhenReady`; canceled -> `Canceled / None`; initial-not-empty -> `MigrationIncomplete / ContactSupport`; valid unequal machine -> `MachineMismatch / ContactSupport`; equal-machine duplicate/conflicting identity -> `IdentityCollision / ContactSupport`; integrity/quiescence/lease -> `SourceGap / ContactSupport`; unsupported -> `UnknownMapping / ContactSupport`; limit -> `LimitExceeded / ContactSupport`; permanent rejection -> `SourceGap / ContactSupport`. `ValidMachineDifference` is evaluated before identity and integrity classification after strict version/syntax decoding. Invalid caller input is replaced by a newly generated safe `SupportCorrelationV1`; it is never reflected.
 
 ## Exact scalar and population bounds
 
@@ -160,8 +261,9 @@ Construction and strict deserialization enforce both scalar count and UTF-8 byte
 | support correlation | random UUID rendered `support:<lowercase-D>`; 44 bytes; no derivation from protected data |
 | timestamps | UTC only, offset zero, 100ns precision, years 2000..9999; canonical `yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'` |
 | history | 0..1,024 complete rows; never paged/truncated |
-| pending operations / lease page | requested limit 1..500; stored operations maximum 100,000 and leases maximum 10,000 per machine partition; N+1 is `LimitExceeded` before writes |
+| pending operations / lease page | requested limit 1..500; active storage epoch maximum 100,000 operations and 10,000 leases; reaching the boundary uses the D3b non-destructive epoch rollover, not lifetime failure |
 | operation attempts | 1..32 per operation; same identity and fingerprint only |
+| storage epoch | positive Int32 1..2,147,483,647; immutable hash-linked predecessor; rollover at the exact active-epoch capacity |
 
 All nullable fields have an explicit legality rule in the transition, operation, and receipt tables; empty string/collection never substitutes for null. Tests cover N-1/N/N+1 construction and strict deserialization for every row, including scalar characters, UTF-8 byte overflow, timestamps, populations, enum numbers/tokens/case, nullability, and future versions.
 
@@ -225,7 +327,9 @@ Pending -> ProvenNotAccepted(RetrySameIdentity | AbortActivation)
 ProvenNotAccepted(RetrySameIdentity) -> Pending(attempt + 1, same IDs/correlations/fingerprint)
 ```
 
-Accepted and `AbortActivation` are terminal. No attempt or resolution evidence is deleted or overwritten. Retry appends a new attempt under the same OperationId/InternalCorrelation/LogicalOperationId/DraftFingerprint; maximum attempt 32. `AbortActivation` leaves current activation disabled but is resolved for quiescence, allowing an owner-approved successor or zero-write rollback when all other predicates pass. It never allocates a replacement identity. Unknown/permanent rejection code is AbortActivation/DoNotRetry.
+Accepted and `AbortActivation` are terminal. No attempt or resolution evidence is deleted or overwritten. Retry appends a new attempt under the same OperationId/InternalCorrelation/LogicalOperationId/DraftFingerprint; maximum attempt 32. When attempt 32 is proven not accepted with a retryable profile disposition, the provider must atomically record that attempt as `ProvenNotAccepted`, replace the disposition with `AbortActivation`, and store the one recognized core code `retry-exhausted-v1`; it never leaves attempt 32 retryable or Pending. The operation is then resolved for quiescence, all 32 attempts remain immutable, current activation remains disabled, and an owner-approved successor or zero-write rollback may recover. It never allocates a replacement identity.
+
+`retry-exhausted-v1` is the only core permanent-rejection/exhaustion token. A profile may classify a known provider result as retryable or map a conclusively permanent result to this token, but no provider-specific text is stored. Any undefined/future rejection enum number, token, alternate case, or profile code is `Unsupported / UnsupportedVersion / DoNotRetry`, null value, zero writes; it must not be coerced to AbortActivation. The same rule applies during stored-row reads.
 
 The TQ profile required by TQ-011B freezes this receipt matrix; shared core enforces the profile-returned shape without embedding the names:
 
@@ -245,7 +349,7 @@ For Pending every receipt/rejection/resolution field is null. For Accepted all m
 
 ## Conformance and acceptance
 
-D3a publishes a reusable provider conformance assembly. It exhausts public enum ordinals, result tuples/factories, method success shapes, strict wire codes, every scalar/population N/N+1, defensive copies/equality, transition tables, all history vectors, lease 4/5 admission, lifecycle/receipt shapes, retry identity, cancellation boundaries, malformed stored values, profile registration, and disclosure-safe rendering. It also preserves the accepted TQ CBE/UUID/draft vectors as external edge-profile fixtures without compiling TQ semantics into core.
+D3a publishes a reusable provider conformance assembly. It exhausts public enum ordinals; non-public method-specific result factories; null-success rejection; exact DTO property order/nullability and unknown-member rejection; strict wire codes; every scalar/population N/N+1; defensive copies/equality; transition/binding/lease/epoch matrices; all history vectors; MachineMismatch trigger/mapping/precedence; PartitionVersion rules; lease 4/5 admission; lifecycle/receipt/exhaustion shapes; retry identity; rejection-code case/version handling; cancellation boundaries; malformed stored values; profile registration; and disclosure-safe rendering. It also preserves the accepted TQ CBE/UUID/draft vectors as external edge-profile fixtures without compiling TQ semantics into core.
 
 Exact commands from the isolated worktree:
 

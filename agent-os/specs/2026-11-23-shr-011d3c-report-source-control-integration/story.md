@@ -31,13 +31,13 @@ Initialization composes existing FDRS and D3 schemas once. Method success does n
 The final combined suite must prove:
 
 1. D1 contract projects and every existing report/FDRS public enum and golden fixture are byte/ordinal unchanged.
-2. D3a canonical core fixtures, three activation-history vectors, enum ordinals, strict wire codes, result tuples, scalar/population N/N+1, receipt shapes, lease cases, and disclosure tests pass.
+2. D3a canonical core fixtures, three activation-history vectors, enum ordinals, strict wire codes, non-public method-specific result factories, exact DTO field order/nullability/unknown-member rejection, scalar/population N/N+1, receipt/exhaustion shapes, lease cases, and disclosure tests pass.
 3. D3b runs identical provider conformance against LiteDB and MongoDB using the exact Common.DataService checkout/property.
 4. Existing FDRS initialization and persistence remain compatible after schema composition; existing collection names/versions/index fields are exact.
-5. One store/partition race tests atomically serialize acquire lease versus successor/rollback, operation resolution versus transition, and FDRS acceptance versus zero-write rollback.
-6. Empty lease/history/pending reads never imply Ready. Unknown version/token/case/malformed storage yields UnsupportedVersion/DoNotRetry, null value, zero writes, and disclosure-safe support correlation.
+5. One store/partition race tests atomically serialize acquire lease versus successor/rollback, operation resolution versus transition, FDRS acceptance versus zero-write rollback, monotonic PartitionVersion allocation, and non-destructive epoch rollover.
+6. Empty lease/history/pending reads never imply Ready. Unknown version/token/case/rejection code/malformed storage yields UnsupportedVersion/DoNotRetry, null value, zero writes, and disclosure-safe support correlation. Attempt-32 exhaustion terminalizes immutably and never deadlocks recovery.
 7. The shared production assemblies contain no TQ/DHS product names, TQ operation/domain/prefix literals, DataService provider literals outside schema descriptors, ambient time, process locks, absolute paths, agent-system/orchestration terms, credentials, or default diagnostic record rendering.
-8. The separately stored TQ edge-profile fixtures still reproduce the accepted operation ID, correlation, UUIDv5, draft, and zone vectors without Common.Reports implementing that profile.
+8. The separately stored TQ edge-profile fixtures still reproduce the accepted operation ID, correlation, UUIDv5, draft, and zone vectors without Common.Reports implementing that profile. Whole-set multi-trigger fixtures prove one precedence with valid machine difference selected before identity/integrity, independent of row order.
 
 ## Exact validation and evidence
 
