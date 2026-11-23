@@ -25,8 +25,8 @@ setup material, recovery codes, or access tokens.
 5. Inventory every non-deleted account and every field in
    [mapping-and-reconciliation.md](mapping-and-reconciliation.md). Record only hashes/enums in the
    aggregate manifest; keep detailed identity mapping in the restricted evidence annex.
-6. Record all active legacy lockouts. Project owner chooses `remain disabled` or `clear under shared
-   policy` for each; no choice is inferred.
+6. Record all active legacy lockouts with disposition `ResetByPolicy`. Do not use lockout state to
+   alter legacy `IsDisabled`; that Boolean is copied exactly.
 7. Verify the shared store baseline contains only the expected seeded bootstrap account. Any other
    account, duplicate normalized username, unknown role, or unexpected schema blocks migration.
 8. Record legacy and shared store hashes and the exact commits. Leave readiness `Disabled`.
@@ -39,13 +39,14 @@ setup material, recovery codes, or access tokens.
 3. For each retained legacy account in stable legacy-ID order:
    1. map role/bundles using the frozen table;
    2. validate/copy profile fields;
-   3. if the normalized username matches the expected seeded bootstrap account, bind it to that
-      shared account and perform an authorized reset; otherwise create through
-      `CreateManagedUser` with a unique temporary credential entered and delivered through the
-      approved masked/out-of-band process;
+   3. reject an ordinal-ignore-case collision with the seeded bootstrap or another retained account;
+      otherwise create a distinct account through `CreateManagedUser` with a newly generated shared
+      ID and a unique temporary credential entered and delivered through the approved masked/out-of-
+      band process;
    4. force `ResetPasswordNextLogin=true`;
    5. apply the exact disabled state through authenticated managed-user update;
-   6. record the legacy/shared ID mapping by a service-stopped read-only database reconciliation;
+   6. record the one-to-one legacy/new-shared ID mapping by a service-stopped read-only database
+      reconciliation; bootstrap is never a mapping target;
    7. record legacy MFA state as `None`, `SetupPending`, or `Enrolled`; never read/export the secret
       or counter into the migration artifact;
    8. verify effective current shared policy for all three report rights.
@@ -55,14 +56,19 @@ setup material, recovery codes, or access tokens.
 6. If global MFA enforcement is on, require setup, verification, one-time recovery-code presentation,
    and acknowledgement before the account can obtain a token. If it is off, preserve the
    re-enrollment-required disposition for later enforcement.
-7. On any per-account failure, stop; do not continue past the first unrecorded partial state. Re-run
+7. After all `N` accounts are staged, require `N >= 1` and at least one enabled mapped Administrator.
+   That mapped Administrator completes mandatory credential reset and any enforced MFA enrollment,
+   authenticates, disables bootstrap through the shared managed-user workflow, and verifies the
+   bootstrap token/continuations are revoked. Record `BootstrapDisabledNotMapped` separately from
+   all `N` mappings.
+8. On any per-account failure, stop; do not continue past the first unrecorded partial state. Re-run
    idempotently by username and mapping state after review.
 
 ## Runbook C: reconciliation
 
 1. Stop shared UserManagement so the store is stable and compute its hash.
 2. Run the read-only reconciler against both frozen stores and the restricted mapping annex.
-3. Validate all 13 exact thresholds in
+3. Validate all 15 exact thresholds in
    [mapping-and-reconciliation.md](mapping-and-reconciliation.md). There is no tolerance below 100%
    and no allowed conflict count above zero.
 4. Start shared UserManagement; wait for `Self=SERVING`; confirm no pre-cutover token is accepted.
@@ -91,7 +97,8 @@ setup material, recovery codes, or access tokens.
    atomic replacement fails, remove the temporary file and execute pre-activation rollback; never
    accept a partial document.
 7. Start shared UserManagement and wait for `Self=SERVING`. Confirm authoritative MFA policy.
-8. Start DHS. Before login it must show reporting unavailable; it must not start the legacy host.
+8. Start DHS. Before login it must return per-operation `Unavailable`/
+   `ReauthenticationRequired`; it must not return `Disabled` or start the legacy host.
 9. Execute smoke checks with governed test accounts for Operator, Supervisor, Administrator,
    QA-bundle Operator, and Service-bundle Operator:
    - Operator/bundle-only report operations deny;
@@ -100,7 +107,10 @@ setup material, recovery codes, or access tokens.
    - each operation rechecks the service;
    - audit context uses distinct stable actor/session IDs without exposing values in UI/logs.
 10. Revoke one test session, restart the service once, and simulate service unavailable. Confirm
-    protected content removal, reauthentication, and no fallback.
+    explicit revocation returns `RevokedSession`, confirmed restart returns
+    `ReauthenticationRequired`, and transient outage returns `PolicyUnavailable` while retaining the
+    token only for an explicit post-health policy retry. All remove protected content and permit no
+    fallback.
 11. Project owner closes the window only after Reviewer Integration records all outcomes.
 
 ## Runbook E: pre-activation rollback
@@ -111,8 +121,10 @@ This runbook is legal only while the activation document has never existed.
 2. Stop DHS and shared UserManagement.
 3. Preserve migration manifests, evidence hashes, and the shared store. Do not delete accounts or
    rewrite the legacy store.
-4. Through an authenticated administrative workflow, disable all newly staged non-bootstrap shared
-   accounts. Record receipts; do not expose credentials or tokens.
+4. Through an authenticated administrative workflow, disable all newly staged mapped shared
+   accounts. Keep bootstrap disabled unless the separately reviewed legacy rollback procedure needs
+   it for a later migration attempt; any re-enable requires a governed receipt. Do not expose
+   credentials or tokens.
 5. Restore the previously reviewed DHS package and its legacy host launchability from the local
    controlled rollback artifact.
 6. Verify the legacy store hash equals the frozen pre-migration hash before starting. Any mismatch
@@ -145,6 +157,12 @@ After the activation document exists, legacy-authority rollback is prohibited.
 | Policy unavailable | Retry when service is ready. | Verify host health, exact commits, configuration and restart behavior. |
 | Migration incomplete/conflict/unknown/support required | Contact support. | Keep reporting unavailable, use restricted evidence, reconcile or roll forward. |
 | Canceled | No action. | Confirm terminal audit handling if an accepted start occurred. |
+
+For `PolicyUnavailable`, the adapter retains the opaque token in private memory but clears policy,
+request context, and protected content. The operator's explicit retry after health recovery performs
+a new `GetAccessPolicy`. A confirmed restart, explicit revocation, local stale generation, expiry, or
+generic rejection follows its distinct reauthentication outcome and clears the token. No background
+retry performs a protected operation.
 
 ## Legacy retirement
 

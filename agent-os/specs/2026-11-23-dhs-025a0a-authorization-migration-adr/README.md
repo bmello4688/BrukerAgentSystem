@@ -21,17 +21,19 @@ contract `985f19bd059242597915d2a38fc728e8892df896`.
 
 ## Artifacts
 
-1. [ADR](adr.md) — context, accepted decisions, rejected alternatives, configuration contract,
+1. [Acceptance story](story.md) — immutable scope, outcomes, criteria, and delivery gate.
+2. [ADR](adr.md) — context, accepted decisions, rejected alternatives, configuration contract,
    invariants, and rollback boundary.
-2. [Immutable evidence](evidence.md) — commit/path/line evidence and ownership/lifetime inventory.
-3. [Mapping and reconciliation](mapping-and-reconciliation.md) — every account, role, right, MFA,
+3. [Immutable evidence](evidence.md) — commit/path/line evidence and ownership/lifetime inventory.
+4. [Mapping and reconciliation](mapping-and-reconciliation.md) — every account, role, all 32 exact
+   shared policy fields, bundle markers, bootstrap/ID rule, MFA,
    credential, session, token, and audit disposition plus exact pass thresholds.
-4. [Sequence diagrams](sequences.md) — login, authorization, MFA lifecycle, cutover, offline,
+5. [Sequence diagrams](sequences.md) — login, authorization, MFA lifecycle, cutover, offline,
    restart, revocation, and rollback.
-5. [Runbooks](runbooks.md) — reprovisioning, reconciliation, cutover, rollback, and support actions.
-6. [Closed outcomes and guidance](outcomes-and-guidance.md) — exhaustive typed states and
+6. [Runbooks](runbooks.md) — reprovisioning, reconciliation, cutover, rollback, and support actions.
+7. [Closed outcomes and guidance](outcomes-and-guidance.md) — exhaustive typed states and
    disclosure-safe default operator guidance.
-7. [DHS-025A0B handoff](a0b-handoff.md) — exact repository base, ownership, tests, builds,
+8. [DHS-025A0B handoff](a0b-handoff.md) — exact repository base, ownership, tests, builds,
    activation gate, and rollback owner.
 
 ## Publication and implementation gate

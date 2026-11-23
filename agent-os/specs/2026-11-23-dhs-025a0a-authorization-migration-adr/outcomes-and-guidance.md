@@ -11,6 +11,9 @@
   endpoint, provider/store name, exception type/message/stack, rights mask, or role detail.
 - Restricted diagnostics may contain approved opaque receipt references, but they are not interpolated
   into default operator text and follow the existing protected logging policy.
+- `readiness` is per exact invocation. After activation it is never `Disabled`. `Ready` means the
+  current session validates and the exact requested capability is allowed; an exact-operation denial
+  is `Unavailable`/`Denied` even when another operation would be allowed for the same session.
 
 ## Exhaustive table
 
@@ -18,11 +21,11 @@
 |---|---|---|---|---|---|
 | `Succeeded` | Exact operation completed with accepted audit terminal result | `Ready` | `None` | Retain per product-state contract | Operation completed. |
 | `InvalidInput` | Required input is missing, malformed, or out of range before authorization/mutation | unchanged | `CorrectRequest` | Retain only if report-surface access remains valid | Check the highlighted information and try again. |
-| `ReauthenticationRequired` | No token, expired token, restart-invalidated token, or authentication continuation ended | `Unavailable` | `Reauthenticate` | Remove | Sign in again to continue. |
-| `Denied` | Valid current session lacks the exact required capability or target scope | `Ready` | `None` | Remove only for report-surface/completed-view denial; otherwise retain authorized content | You are not authorized to perform this operation. |
-| `StaleSession` | Local session generation changed or a request completed against a superseded session | `Unavailable` | `Reauthenticate` | Remove | Your sign-in is no longer current. Sign in again. |
-| `RevokedSession` | User/session was explicitly revoked or current-account validation rejects it | `Unavailable` | `Reauthenticate` | Remove | Your sign-in is no longer active. Sign in again. |
-| `PolicyUnavailable` | Service health or policy RPC is unavailable/timeout and no authoritative decision exists | `Unavailable` | `RetryWhenReady` | Remove | Reporting is temporarily unavailable. Try again when the service is ready. |
+| `ReauthenticationRequired` | No token, expired token, confirmed service-restart invalidation, authentication continuation ended, or token rejection without stronger stale/revoked evidence | `Unavailable` | `Reauthenticate` | Remove | Sign in again to continue. |
+| `Denied` | Valid current session lacks the exact required capability or target scope | `Unavailable` | `None` | Remove only for report-surface/completed-view denial; otherwise retain authorized content | You are not authorized to perform this operation. |
+| `StaleSession` | The local atomic session generation changed before publication or a result belongs to a superseded local generation | `Unavailable` | `Reauthenticate` | Remove | Your sign-in is no longer current. Sign in again. |
+| `RevokedSession` | An explicit successful logout/revocation or managed-account mutation receipt identifies the current session as revoked | `Unavailable` | `Reauthenticate` | Remove | Your sign-in is no longer active. Sign in again. |
+| `PolicyUnavailable` | Service health or policy RPC is unavailable/timeout and no authoritative token decision exists | `Unavailable` | `RetryWhenReady` | Remove; retain only the opaque memory token for an explicit post-health policy retry | Reporting is temporarily unavailable. Try again when the service is ready. |
 | `MigrationIncomplete` | Activation/manifests/reconciliation are absent or any exact threshold failed | `Unavailable` when activated; otherwise `Disabled` | `ContactSupport` | Remove | Reporting setup is not complete. Contact support. |
 | `IdentityOrPolicyConflict` | Duplicate/mismatched actor claim, session, machine/scope, role, rights, manifest, or revision | `Unavailable` | `ContactSupport` | Remove | Reporting cannot continue because required security information is inconsistent. Contact support. |
 | `UnknownCodeOrVersion` | Unknown outcome, role/right bit, operation, contract, manifest schema, mode, or product/service version | `Unavailable` | `ContactSupport` | Remove | Reporting cannot continue with this software version. Contact support. |
@@ -49,6 +52,20 @@ When more than one condition is observed, select exactly one outcome in this ord
 An irreversible effect that may already have occurred is not rewritten to `Canceled`, `Denied`, or
 `PolicyUnavailable`. It follows the SHR-014C two-dimensional effect/audit outcome and uses
 `SupportRequired` only when the product cannot safely present the normal typed result.
+
+## Token and state action matrix
+
+| Outcome | Token action | Policy/context action | Next authorization attempt |
+|---|---|---|---|
+| Transient policy outage | Retain only in private memory; never persist or expose | Clear policy, invocation context, and protected content | Explicit operator retry after health is ready; always call `GetAccessPolicy` again |
+| Missing, expired, restart-invalidated, or generically rejected token | Clear | Clear policy, context, and protected content | New login |
+| Superseded local generation | Clear the superseded generation | Clear policy, context, and protected content | New login |
+| Explicitly revoked session | Clear | Clear policy, context, and protected content | New login after the governed account action permits it |
+| Valid session denied the exact operation | Retain current valid session | Discard denied invocation context; retain displayed content only for operation-specific denial | No automatic retry; a different operation performs its own authoritative check |
+
+No health timer or background task may use the retained outage token to perform a protected action.
+If the explicit post-health retry receives a generic rejection, return `ReauthenticationRequired`;
+use `StaleSession` or `RevokedSession` only when their stronger trigger evidence exists.
 
 ## Disclosure fixtures
 

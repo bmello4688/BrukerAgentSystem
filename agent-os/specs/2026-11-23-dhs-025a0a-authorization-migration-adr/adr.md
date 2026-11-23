@@ -24,7 +24,7 @@ cache never authorizes reporting.
 
 | ID | Topic | Accepted decision |
 |---|---|---|
-| D01 | Account transition | `ControlledReprovisioning`; create a distinct shared account for every retained legacy account and record an immutable legacy-ID-to-shared-ID mapping manifest. |
+| D01 | Account transition | `ControlledReprovisioning`; create a distinct shared account with a newly generated `AppUser.Id` for every retained legacy account and record an immutable one-to-one mapping manifest. The seeded bootstrap account is never rebound to a legacy account. |
 | D02 | Credential transition | Unique temporary credential plus mandatory reset on first shared login. Password hashes, password material, security stamps, and reset tokens are not copied. |
 | D03 | MFA transition | Do not copy legacy TOTP secrets/counters. Record prior state, set the shared disposition to re-enrollment required for legacy-enrolled/setup-pending users, and complete enrollment through shared setup/verify/recovery APIs. |
 | D04 | Session cutover | Invalidate all legacy sessions. No one-time exchange, token translation, or dual acceptance exists. All users reauthenticate to shared UserManagement. |
@@ -33,7 +33,7 @@ cache never authorizes reporting.
 | D07 | Offline/degraded behavior | Reporting is unavailable and protected content is removed. No cached-rights authorization, offline token validation, or legacy fallback is allowed. Unrelated non-report DHS workflows remain available. |
 | D08 | Cutover | Stop DHS, reconcile at 100%, deploy the A0B binary, disable legacy host startup, remove old executable launchability, atomically install the hash-bound v1 activation document, start shared service, then start DHS. |
 | D09 | Mixed version | `N-1` and `N` are never concurrently authorized. Before activation every `N` build reports `Disabled`; after activation only the exact A0B build and Services `985f19b` may report `Ready`. Any mismatch is `Unavailable`. |
-| D10 | Reconciliation | All retained accounts and all fields require an explicit disposition; every count must match, every mapping must be unique, and conflicts/unknowns must be zero. The exact thresholds are in [mapping-and-reconciliation.md](mapping-and-reconciliation.md). |
+| D10 | Reconciliation | All retained accounts, all 32 exact shared `AccessPolicy` fields, both bundle markers, and every legacy field require an explicit disposition. Every count must match, every mapping must be unique, and conflicts/unknowns must be zero. The seeded bootstrap is counted separately. `N=0` is a deterministic migration failure, not an empty successful cutover. The exact thresholds are in [mapping-and-reconciliation.md](mapping-and-reconciliation.md). |
 | D11 | Rollback | The last rollback-to-legacy point is immediately before activation. After activation there is no return to legacy authority; preserve shared account changes and roll forward while reporting remains unavailable. |
 | D12 | Legacy retirement | A0B retains the stopped legacy store and code as read-only evidence for a separately reviewed destruction story. It removes them from startup/composition and denies execution; it does not delete them. |
 
@@ -115,12 +115,18 @@ replacement. Its full-document SHA-256 is the `ConfigurationRevision`.
 | Readiness | Exact condition | Reporting behavior |
 |---|---|---|
 | `Disabled` | Activation document absent. | Report navigation/actions unavailable; no legacy authorization read. |
-| `Unavailable` | Document present but malformed/unknown, commit or hash mismatch, migration incomplete, service not `SERVING`, MFA policy non-authoritative, no valid session, policy RPC failure, or identity/context conflict. | Fail closed, remove protected report content, retain unrelated workflows, show safe guidance. |
-| `Ready` | Exact v1 document; exact DHS/Services commits; both manifests hash-match and passed; service `SERVING`; MFA policy authoritative; current shared session validates; current exact operation is allowed. | Permit only that checked operation and issue its request-local trusted context. |
+| `Unavailable` | Document present but malformed/unknown, commit or hash mismatch, migration incomplete, service not `SERVING`, MFA policy non-authoritative, no valid session, policy RPC failure, identity/context conflict, or the current exact operation is denied. | Fail closed for that invocation, apply the outcome-specific protected-content disposition, retain unrelated workflows, and show safe guidance. |
+| `Ready` | Exact v1 document; exact DHS/Services commits; both manifests hash-match and passed; service `SERVING`; MFA policy authoritative; current shared session validates; and the current exact operation is allowed. | Permit only that checked operation and issue its request-local trusted context. |
 
 Unknown fields are allowed only if the `contract` remains exactly v1 and the v1 parser explicitly
 ignores them. Unknown contract values, missing required fields, duplicated JSON keys, invalid
 canonicalization, or unsupported modes are `Unavailable`.
+
+Readiness is evaluated for one exact invocation and capability, not cached as a user-wide grant.
+One session may therefore receive `Ready` for report viewing and `Unavailable`/`Denied` for export.
+After activation, `Disabled` is impossible: missing login/session is `Unavailable` with
+`ReauthenticationRequired`; a valid session denied the requested operation is `Unavailable` with
+`Denied`.
 
 ## Cutover and failure invariants
 
@@ -131,8 +137,16 @@ canonicalization, or unsupported modes are `Unavailable`.
   permission or legacy identity client/host.
 - Startup never becomes `Ready` until the shared service health stream reports `SERVING` and all
   manifests match.
-- A service restart empties the service token cache. DHS immediately discards its token and protected
-  content and requires login.
+- A transient health/policy outage with no authoritative token rejection removes protected content
+  and request-local policy/context but retains the opaque memory-only token solely for an explicit
+  retry after health returns. That retry must call `GetAccessPolicy` again before any protected
+  action. No protected operation retries in the background.
+- A confirmed service restart empties the service token cache. DHS discards its token, policy,
+  request context, and protected content and returns `ReauthenticationRequired`.
+- A local session-generation mismatch returns `StaleSession`; an explicit successful revocation or
+  managed-account mutation receipt affecting that session returns `RevokedSession`. A generic token
+  rejection with no stronger evidence returns `ReauthenticationRequired`. All three clear the local
+  token and protected state.
 - Revocation races are resolved at the protected boundary: a failed or revoked recheck prevents
   source access/mutation. A revocation after an irreversible boundary is audited as the real effect;
   it is never reported as prevented.
@@ -161,6 +175,7 @@ canonicalization, or unsupported modes are `Unavailable`.
 - Supervisor reporting becomes allowed and QA/Service bundle-only reporting becomes denied according
   to the separately approved shared matrix. These are explicit governed changes, not inferred legacy
   mappings.
-- Service outage or restart interrupts reporting and requires reauthentication, but does not block
-  unrelated DHS workflows.
+- Service outage interrupts reporting and permits an explicit retry when health returns; a confirmed
+  restart invalidates the token and requires reauthentication. Neither blocks unrelated DHS
+  workflows.
 - The legacy store remains sensitive read-only evidence until a separate reviewed retirement story.

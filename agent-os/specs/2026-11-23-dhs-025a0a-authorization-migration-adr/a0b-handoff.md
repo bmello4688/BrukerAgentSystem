@@ -89,8 +89,11 @@ scope implicitly.
    Never authorize from UI state, role name, cached policy, legacy permission, or USB/printer state.
 7. Construct an immutable SHR-014C trusted envelope per invocation and validate machine/scope/source/
    version/revision. No ambient/static identity.
-8. On logout/restart/revocation/outage/conflict, atomically clear token, context, cached projection,
-   and protected content. No background retry may execute a protected operation without a new check.
+8. On logout, confirmed restart, stale generation, explicit revocation, expiry, generic token
+   rejection, or conflict, atomically clear token, context, cached projection, and protected content.
+   On transient health/policy outage only, retain the opaque token in private memory while clearing
+   context, projection, and protected content; an explicit post-health retry must recheck the exact
+   operation. No background retry may execute a protected operation.
 9. Implement the migration/reconciliation tooling as local, explicit maintenance-mode commands with
    host-owned masked credential entry and canonical manifests. Never accept credentials from command
    arguments or emit sensitive values.
@@ -101,23 +104,29 @@ scope implicitly.
 
 ### Focused automated behavior
 
-- Account mapping: every field disposition, all six role mappings, corrections, disabled accounts,
-  username collision, unknown/duplicate role, seeded bootstrap binding, `N=0`, `N=1`, and `N+1`.
+- Account mapping: every field disposition, all six role mappings, corrections, exact legacy
+  `IsDisabled`, active-lockout `ResetByPolicy`, disabled accounts, username collision,
+  `BootstrapDisabledNotMapped`, prohibition on bootstrap binding, newly generated one-to-one IDs,
+  unknown/duplicate role, `N=0` failure, `N=1`, and `N+1` counting.
 - Credentials: mandatory reset for all enabled accounts; no legacy hash/secret serialization; masked
   input and disclosure fixtures.
 - MFA: enforcement off/on; prior none/setup/enrolled; setup/verify/recovery acknowledgement;
   authorized disable/reset/recovery; enrollment preservation while off; service restart during every
   continuation; no secret/counter copy.
-- Policy: all three base roles and four bundle sets; exact access/export/print fields; Administrator
-  SSI only; unknown bits/roles/conflicts/bundle-only fail closed.
+- Policy: all three base roles and four bundle sets; an exact set-equality assertion over all 32
+  published `AccessPolicy` fields including `CanEditSubstanceLibrary`; separate bundle-marker checks;
+  exact access/export/print fields; Administrator SSI only; unknown bits/roles/conflicts/bundle-only
+  fail closed.
 - Operation boundaries: surface, three generation operations, completed view, export, print, print
   settings, and SSI edit each call the service; source/mutation is not called on denial/failure.
 - Session/token: success, 24-hour expiry seam, no refresh, logout, stale generation, explicit revoke,
-  role/bundle/disable/password/MFA revocation, service restart, parallel requests, cancellation, and
-  request-local actor/session isolation.
+  role/bundle/disable/password/MFA revocation, confirmed service restart, transient outage with
+  token-retaining explicit retry, generic rejection, parallel requests, cancellation, and request-
+  local actor/session isolation.
 - Readiness/config: absent document, malformed/duplicate keys, wrong hash/commit/mode/version,
   incomplete manifest, health transition, authoritative/non-authoritative MFA response, atomic
-  replacement interruption, and exact `Disabled`/`Unavailable`/`Ready` transitions.
+  replacement interruption, pre-activation-only `Disabled`, post-activation no-session
+  `Unavailable`, per-operation denial `Unavailable`, and `Ready` only for the allowed exact operation.
 - Mixed version: N-1 package not launchable after activation; wrong DHS or Services commit is
   `Unavailable`; no legacy fallback under any injected fault.
 - Rollback: pre-activation restore; post-activation roll-forward only; post-cutover shared changes are

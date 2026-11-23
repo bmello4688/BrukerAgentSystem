@@ -97,4 +97,6 @@ global/per-user MFA, role/bundle fail-closed policy, target scope, and gRPC work
 Lossless database/credential/MFA/session migration is not established. Controlled reprovisioning is
 the only selected path that avoids copying incompatible secrets or fabricating authority. Shared
 Services has the required policy and MFA lifecycle, but products must supply request-local audit
-identity from a just-validated service token and must treat restart/outage as reauthentication.
+identity from a just-validated service token. A confirmed restart invalidates the token and requires
+reauthentication; a transient outage with no token decision retains the opaque token only for an
+explicit post-health authoritative policy retry.

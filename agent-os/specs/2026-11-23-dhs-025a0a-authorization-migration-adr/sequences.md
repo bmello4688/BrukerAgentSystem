@@ -31,7 +31,7 @@ sequenceDiagram
         A->>UM: GetAccessPolicy(same token)
         UM-->>A: Current policy
         A->>A: Validate one ActorUserId; derive SessionId
-        A-->>DHS: Ready session projection
+        A-->>DHS: Authenticated session; no operation is Ready until its own check allows it
     end
 ```
 ## Operation authorization and SHR-014C context
@@ -47,10 +47,20 @@ sequenceDiagram
     Operator->>UI: Request protected report operation
     UI->>A: Authorize(operation, request scope)
     A->>UM: GetAccessPolicy(current token)
-    alt Unavailable, stale, expired, or revoked
-        UM--xA: Failure
+    alt Health/policy unavailable with no token decision
+        UM--xA: Unavailable or timeout
+        A->>A: Retain opaque token only; clear policy, context, protected content
+        A-->>UI: PolicyUnavailable / RetryWhenReady
+    else Generic token rejection, expiry, or confirmed restart
+        UM--xA: Token rejected
         A->>A: Clear token, actor/session, protected content
-        A-->>UI: ReauthenticationRequired or PolicyUnavailable
+        A-->>UI: ReauthenticationRequired
+    else Local generation superseded
+        A->>A: Clear superseded token, actor/session, protected content
+        A-->>UI: StaleSession
+    else Explicit revocation/mutation receipt identifies current session
+        A->>A: Clear revoked token, actor/session, protected content
+        A-->>UI: RevokedSession
     else Policy received
         UM-->>A: Current AccessPolicy
         A->>A: Validate exact capability, actor, session, machine/scope, revision
@@ -174,7 +184,7 @@ sequenceDiagram
         Deploy->>Deploy: Atomically install v1 activation document
         Deploy->>UM: Start and verify Self=SERVING
         Deploy->>NewDHS: Start
-        NewDHS-->>Owner: Disabled until login; then request-local Ready
+        NewDHS-->>Owner: Unavailable/ReauthenticationRequired until login; Ready only for an allowed exact operation
     end
 ```
 
@@ -190,9 +200,13 @@ sequenceDiagram
     DHS->>A: Authorize exact operation
     A->>UM: GetAccessPolicy(token)
     UM--xA: Unavailable
-    A->>A: Set Unavailable; discard policy, token context, and protected content
+    A->>A: Set Unavailable; retain opaque token only; discard policy, invocation context, and protected content
     A-->>DHS: PolicyUnavailable / retry-when-ready
     DHS-->>Operator: Neutral persistent guidance; unrelated workflows remain
+    Operator->>DHS: Explicit retry after health is ready
+    DHS->>A: Authorize exact operation again
+    A->>UM: GetAccessPolicy(same retained token)
+    Note over A,UM: No protected operation occurs unless this new check allows it
 ```
 
 ## Shared service restart
@@ -203,13 +217,13 @@ sequenceDiagram
     participant A as DHS adapter
     participant DHS
     UM-->>A: Health leaves SERVING
-    A->>A: Set Unavailable; clear protected content/context
+    A->>A: Set Unavailable; retain token provisionally; clear protected content/context
     UM->>UM: Restart; token and continuation caches are empty
     UM-->>A: Health returns SERVING
     A->>UM: GetAccessPolicy(old token)
     UM--xA: PermissionDenied
     A->>A: Discard old token
-    A-->>DHS: ReauthenticationRequired
+    A-->>DHS: ReauthenticationRequired (confirmed restart)
 ```
 
 ## Revocation
@@ -221,12 +235,12 @@ sequenceDiagram
     participant A as DHS adapter
     participant DHS
     Administrator->>UM: Disable/change role/reset credential or MFA
-    UM->>UM: Remove token and continuations
+    UM->>UM: Remove token and continuations; issue successful governed mutation receipt
     DHS->>A: Next protected operation
     A->>UM: GetAccessPolicy(revoked token)
-    UM--xA: PermissionDenied
+    UM--xA: PermissionDenied; receipt identifies current session mutation
     A->>A: Clear token/context/content
-    A-->>DHS: ReauthenticationRequired
+    A-->>DHS: RevokedSession
 ```
 
 ## Logout
