@@ -19,7 +19,7 @@ sequenceDiagram
     C-->>P: durable pending intent + deterministic correlations
     P->>R: StartSampleAsync(identical StartSampleCommand)
     R-->>P: AcceptedSample(EventId, correlation, receipt)
-    P->>C: CompleteOperationAsync(accepted receipt)
+    P->>C: ResolveOperationAsync(accepted receipt)
     P-->>SC: accepted
     SC->>A: enter collection and acquire
     A->>A: classify + approved result/alarm mapping
@@ -27,14 +27,14 @@ sequenceDiagram
     P->>C: CreateOrReadOperationAsync(exact terminal draft fingerprint)
     P->>R: CompleteSampleAsync(CompleteSampleCommand)
     R-->>P: committed terminal receipt
-    P->>C: CompleteOperationAsync(accepted receipt)
+    P->>C: ResolveOperationAsync(accepted receipt)
     P-->>A: completed
     opt explicit authorized annotation exists
         A->>P: AddEventAnnotationAsync(target Event, stable author/session)
         P->>C: CreateOrReadOperationAsync(exact annotation draft fingerprint)
         P->>R: AppendRecordAsync(EventAnnotationAddedPayload)
         R-->>P: committed append receipt
-        P->>C: CompleteOperationAsync(accepted receipt)
+        P->>C: ResolveOperationAsync(accepted receipt)
     end
     Q->>Q: require Ready + exact machine/zone/T0
     Q->>D2: QueryEquipment/Event/UserAsync(request, page)

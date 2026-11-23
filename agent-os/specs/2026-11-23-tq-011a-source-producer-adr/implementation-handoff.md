@@ -10,8 +10,8 @@
 |---|---|
 | TQ-011A publication | Exact accepted planning SHA plus independent Reviewer Integration GO. |
 | SHR-011D1 | Accepted/published Common.Reports SHA; exact `IFdrsReportSourceQuery` symbols/signatures and conformance command match the ADR. |
-| SHR-011D3 | Accepted/published Common.Reports SHA containing exact `IReportSourceControlStoreV1`, typed `Initial`/`Successor`/`Rollback` modes and closed reasons, atomic transition table, nine operation kinds/eight phases, CBE-v1 identity/draft vectors, `DataServiceReportSourceControlStoreV1`, three named collections, durable journal, and conformance commands from the [contract story](../2026-11-23-shr-011d3-report-source-control-store/story.md). |
-| SHR-011D2 | Accepted/published Common.Reports SHA descendant of D1 and D3; exact `DataServiceFdrsReportSourceQuery` provider/project, activation-history snapshot fingerprint/interval validation, and tests match the ADR. |
+| SHR-011D3 | Accepted/published D3c Common.Reports SHA containing exact product-neutral `IReportSourceControlStoreV1`, typed `Initial`/`Successor`/`Rollback`, canonical history, D2 lease contract, immutable attempt journal, strict receipt shapes, DataService provider/schema composition, and conformance commands from the [contract epic](../2026-11-23-shr-011d3-report-source-control-store/story.md). TQ-specific operation/domain/prefix semantics remain in the separately reviewed TQ profile implemented by TQ-011B. |
+| SHR-011D2 | Accepted/published Common.Reports SHA descendant of D1 and D3c; exact `DataServiceFdrsReportSourceQuery` provider/project, D3 lease use, activation-history snapshot fingerprint/interval validation, and tests match the ADR. |
 | actor/session | Accepted bridge contract/implementation SHA proving durable UserId/SessionId/attempt lifecycle and no token/display-name persistence. |
 | alarm mapping | Named Bruker SME/owner approval, versioned controlled code/strength mapping, exhaustive unknown-value tests. |
 | config identity | Accepted canonical `ConfigurationRevisionId` source available at sample acceptance, plus owner-approved successor-activation workflow for legitimate changes. |

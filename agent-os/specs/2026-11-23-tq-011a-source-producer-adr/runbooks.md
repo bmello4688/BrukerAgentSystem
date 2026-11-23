@@ -5,7 +5,7 @@ All runbooks use closed outcomes from [outcomes.md](outcomes.md). Support logs c
 ## A. Predeployment/readiness runbook
 
 1. Record the accepted TQ-011A planning SHA and independent Reviewer Integration GO.
-2. Record independently published SHR-011D1 and SHR-011D3 SHAs, then the SHR-011D2 SHA descended from both. Verify D3's typed activation modes/reasons, CBE-v1 vectors, closed operation/phase catalog, exact control interface/provider/collections, activation-interval behavior, and conformance commands.
+2. Record independently published SHR-011D1 and SHR-011D3c SHAs, then the SHR-011D2 SHA descended from both. Verify D3's product-neutral typed activation modes/reasons, CBE-v1/history vectors, lease/journal contract, exact control interface/provider/collections, activation-interval behavior, and conformance commands. Verify the TQ-011B edge profile independently supplies and reproduces the closed nine-operation/eight-phase catalog and accepted TQ vectors.
 3. Record the trusted identity/session bridge SHA and tests proving stable `UserId`/`SessionId`, denied-attempt behavior, lifecycle ordering, and token/display-name exclusion.
 4. Record the owner/SME-approved alarm mapping version and tests for every analyzer terminal state/code/strength, including unknown values.
 5. Record the configuration-manifest producer version, exact TQ-011B product SHA, Reports gitlink containing D1/D2/D3, unchanged DataService gitlink, and any separately accepted Services gitlink. Verify source name `triplequadui.substance-analyzer-core` and running assembly informational version.

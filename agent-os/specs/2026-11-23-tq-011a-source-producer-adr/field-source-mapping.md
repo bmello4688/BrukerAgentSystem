@@ -85,7 +85,7 @@ For `(activated MachineId, positive SampleEventId)`, D2 returns at most one comp
 | annotation | future explicit authorized report-annotation command | `AddEventAnnotationAsync` | `AppendRecordAsync` |
 | alarm reason | approved result/code/strength mapper in reporting boundary | input to `CompleteSampleAsync` | `CompleteSampleAsync` |
 | activation/control state | Common.Reports SHR-011D3 provider; owner-approved cutover/reactivation/rollback hook | `IReportSourceControlStoreV1.TransitionActivationAsync` with closed mode/reason | atomic DataService transition in the machine partition |
-| durable retry | producer journals; lifecycle service is sole dispatcher | `CreateOrReadOperationAsync` / `CompleteOperationAsync`; nine enum kinds and CBE-v1 identities/fingerprints | `fdrs_producer_operations_v1` through SHR-011D3 only |
+| durable retry | producer journals; lifecycle service is sole dispatcher | D3 `CreateOrReadOperationAsync` / `ResolveOperationAsync` / `RetryProvenNotAcceptedAsync`; TQ edge profile supplies nine controlled kinds and CBE-v1 identities/fingerprints | D3 operation and immutable attempt collections through `IReportSourceControlStoreV1` only |
 
 ## Explicit prohibited sources
 
